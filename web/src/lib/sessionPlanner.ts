@@ -201,19 +201,17 @@ export function planSession(config: SessionConfig, history: PlannerHistory = EMP
     }
   } else {
     kindList.forEach((k, i) => quota.set(k, Number.isFinite(limitN) ? Math.max(1, Math.round((limitN * weights[i]!) / totalW)) : Infinity));
-    let progress = true;
-    while (progress && chosen.length < limitN) {
-      progress = false;
-      for (const k of kindList) {
-        const pool = byKind.get(k)!;
-        const taken = chosen.filter((c) => c.kind === k).length;
-        if (taken >= (quota.get(k) ?? Infinity) || pool.length === 0) continue;
-        const next = pool.shift()!;
-        if (minutes + next.estimatedMinutes > limitT) continue;
+    // 所要時間の短い種別から、割当て数まで取る（時間枠を超えるものは飛ばす）
+    for (const k of kindList) {
+      const pool = byKind.get(k)!;
+      let taken = 0;
+      while (pool.length && taken < (quota.get(k) ?? Infinity) && chosen.length < limitN) {
+        const next = pool[0]!;
+        if (minutes + next.estimatedMinutes > limitT) break;
+        pool.shift();
         chosen.push(next);
         minutes += next.estimatedMinutes;
-        progress = true;
-        if (chosen.length >= limitN) break;
+        taken++;
       }
     }
     // 割当てに余りがあれば埋める
