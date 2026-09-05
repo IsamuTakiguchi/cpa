@@ -1,0 +1,32 @@
+{
+  "name": "cpa-exam-app",
+  "private": true,
+  "version": "0.1.0",
+  "description": "2027年公認会計士試験（論文式）対策アプリ: 会計学・監査論・租税法",
+  "workspaces": [
+    "shared",
+    "web",
+    "server"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n web,api -c cyan,magenta \"npm run dev -w web\" \"npm run dev -w server\"",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "npm run start -w server",
+    "typecheck": "npm run typecheck -w shared && npm run typecheck -w web && npm run typecheck -w server",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.19.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.39.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.48.0",
+    "vitest": "^5.0.0"
+  }
+}

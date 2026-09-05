@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #1e3a5f;
+  --color-brand-light: #2d5a8e;
+  --color-accent: #f59e0b;
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+textarea,
+input {
+  font-size: 16px; /* iOS のズーム防止 */
+}
+
+.prose-note {
+  @apply text-[15px] leading-7;
+}
+.prose-note h1 {
+  @apply mt-8 mb-3 text-xl font-bold text-slate-900 border-b-2 border-slate-300 pb-1;
+}
+.prose-note h2 {
+  @apply mt-6 mb-2 text-lg font-bold text-brand border-l-4 border-brand pl-2;
+}
+.prose-note h3 {
+  @apply mt-4 mb-1 text-base font-bold;
+}
+.prose-note h4 {
+  @apply mt-3 mb-1 font-bold;
+}
+.prose-note p {
+  @apply my-2;
+}
+.prose-note ul {
+  @apply my-2 list-disc pl-5;
+}
+.prose-note ol {
+  @apply my-2 list-decimal pl-5;
+}
+.prose-note li {
+  @apply my-0.5;
+}
+.prose-note strong {
+  @apply font-bold text-slate-900 bg-amber-50 px-0.5 rounded;
+}
+.prose-note table {
+  @apply my-3 w-full text-sm border-collapse;
+}
+.prose-note th,
+.prose-note td {
+  @apply border border-slate-300 px-2 py-1 align-top;
+}
+.prose-note th {
+  @apply bg-slate-100;
+}
+.prose-note blockquote {
+  @apply border-l-4 border-slate-300 pl-3 text-slate-600 my-2;
+}
+.prose-note code {
+  @apply bg-slate-100 px-1 rounded text-[13px];
+}
+.prose-note hr {
+  @apply my-4 border-slate-200;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed select-none;
+}
+.btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand-light active:bg-brand;
+}
+.btn-secondary {
+  @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50;
+}
+.btn-ghost {
+  @apply btn text-slate-600 hover:bg-slate-100;
+}
+.btn-danger {
+  @apply btn bg-red-600 text-white hover:bg-red-700;
+}
+.card {
+  @apply rounded-xl bg-white shadow-sm border border-slate-200 p-4;
+}
+.input {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand;
+}
+.label {
+  @apply block text-sm font-medium text-slate-600 mb-1;
+}
+.chip {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+    padding: 0;
+  }
+  .print-area {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  .prose-note strong {
+    background: none;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  @page {
+    margin: 15mm;
+  }
+}
