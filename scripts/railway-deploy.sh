@@ -149,13 +149,36 @@ note "URL: $url"
 # --- 7. デプロイ ----------------------------------------------------------------
 if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
   step "デプロイ（ビルドログを表示）"
-  if ! railway up --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --ci; then
+  gql() { curl -sS --max-time 30 -H "Authorization: Bearer $RAILWAY_API_TOKEN" -H "Content-Type: application/json" https://backboard.railway.com/graphql/v2 -d "$1"; }
+  deploy_once() {
+    local out
+    out="$(railway up --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --ci 2>&1 | tee /dev/stderr)" || true
+    if echo "$out" | grep -q "Deploy failed\|Build failed\|failed"; then
+      local dep_id
+      dep_id="$(echo "$out" | grep -o 'id=[0-9a-f-]*' | head -1 | cut -d= -f2)"
+      if [[ -n "$dep_id" ]]; then
+        echo
+        echo "==> デプロイの状態 (deployment $dep_id):"
+        gql "$(jq -cn --arg id "$dep_id" '{query:"query($id:String!){ deployment(id:$id){ status statusUpdatedAt meta } }", variables:{id:$id}}')" | jq '.' 2>/dev/null || true
+      fi
+      return 1
+    fi
+    return 0
+  }
+  if ! deploy_once; then
     echo
-    echo "==> デプロイ失敗。ビルドログ（直近 200 行）:"
+    echo "==> ビルドログ（直近 200 行）:"
     railway logs --build --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 200 2>&1 | tail -200 || true
-    echo "==> デプロイログ（直近 100 行）:"
-    railway logs --deployment --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 100 2>&1 | tail -100 || true
-    fail "railway up が失敗しました。上のログを確認してください"
+    echo "==> Railway 側の一時的なビルド障害の可能性があるため、20 秒後に 1 回だけ再試行します"
+    sleep 20
+    if ! deploy_once; then
+      echo
+      echo "==> 2 回目も失敗しました。考えられる原因:"
+      echo "  1) Railway アカウントが Limited Trial（コードのデプロイ不可）: https://railway.com/verify で認証するか、Hobby プランに加入してください"
+      echo "  2) Metal ビルダーの一時障害: Railway の web サービス → Settings → Build → 'Metal build environment' をオフにして再実行"
+      echo "  3) Dockerfile のビルドエラー: 上のビルドログを確認"
+      fail "railway up が失敗しました"
+    fi
   fi
   step "起動を待機"
   ok=0
