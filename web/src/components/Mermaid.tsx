@@ -31,7 +31,7 @@ export interface MermaidProps {
   /** 拡大表示ボタンを出す */
   zoomable?: boolean;
   title?: string;
-  /** true: 幅に合わせて縮小（既定）。false: 原寸で表示し横スクロール（体系マップなど大きい図向け） */
+  /** true: 常に幅に合わせて縮小。false（既定）: 縮小率が 0.7 を下回る場合は原寸で表示し横スクロール */
   fitWidth?: boolean;
 }
 
@@ -45,7 +45,7 @@ function naturalSize(el: SVGSVGElement, minWidth = 0) {
   el.style.height = "auto";
 }
 
-export function Mermaid({ code, onRendered, className = "", zoomable = true, title, fitWidth = true }: MermaidProps) {
+export function Mermaid({ code, onRendered, className = "", zoomable = true, title, fitWidth = false }: MermaidProps) {
   const ref = useRef<HTMLDivElement>(null);
   const zoomRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);

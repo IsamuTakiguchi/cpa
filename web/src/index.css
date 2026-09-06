@@ -110,6 +110,12 @@ input {
 @media print {
   .mermaid {
     break-inside: avoid;
+    overflow: visible !important;
+  }
+  .mermaid svg {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
   }
   .no-print {
     display: none !important;
