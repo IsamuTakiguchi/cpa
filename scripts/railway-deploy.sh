@@ -122,7 +122,7 @@ if railway volume list --json 2>/dev/null | jq -e --arg m "$MOUNT_PATH" '[.. | s
   note "既存のボリュームあり"
 else
   note "ボリュームを作成します"
-  railway volume add --service "$WEB_SERVICE" --mount-path "$MOUNT_PATH" --json >/dev/null
+  railway volume --service "$WEB_SERVICE" --environment "$ENVIRONMENT" add --mount-path "$MOUNT_PATH" --json >/dev/null
   add_summary "- スナップショット用ボリューム \`$MOUNT_PATH\` を作成しました"
 fi
 
