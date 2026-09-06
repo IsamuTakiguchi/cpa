@@ -149,7 +149,14 @@ note "URL: $url"
 # --- 7. デプロイ ----------------------------------------------------------------
 if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
   step "デプロイ（ビルドログを表示）"
-  railway up --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --ci
+  if ! railway up --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --ci; then
+    echo
+    echo "==> デプロイ失敗。ビルドログ（直近 200 行）:"
+    railway logs --build --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 200 2>&1 | tail -200 || true
+    echo "==> デプロイログ（直近 100 行）:"
+    railway logs --deployment --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 100 2>&1 | tail -100 || true
+    fail "railway up が失敗しました。上のログを確認してください"
+  fi
   step "起動を待機"
   ok=0
   for i in $(seq 1 60); do
