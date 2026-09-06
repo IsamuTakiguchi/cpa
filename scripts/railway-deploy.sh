@@ -122,7 +122,13 @@ if railway volume list --json 2>/dev/null | jq -e --arg m "$MOUNT_PATH" '[.. | s
   note "既存のボリュームあり"
 else
   note "ボリュームを作成します"
-  railway volume --service "$WEB_SERVICE" --environment "$ENVIRONMENT" add --mount-path "$MOUNT_PATH" --json >/dev/null
+  # `railway volume` の --service/--environment は ID 指定なので、名前から ID を引く
+  svc_id="$(railway service list --json 2>/dev/null | json_id_by_name "$WEB_SERVICE")"
+  env_id="$(railway environment list --json 2>/dev/null | json_id_by_name "$ENVIRONMENT")"
+  if ! railway volume ${svc_id:+--service "$svc_id"} ${env_id:+--environment "$env_id"} add --mount-path "$MOUNT_PATH"; then
+    echo "  ID 指定で失敗したため、リンク済みサービスで再試行します"
+    railway volume add --mount-path "$MOUNT_PATH"
+  fi
   add_summary "- スナップショット用ボリューム \`$MOUNT_PATH\` を作成しました"
 fi
 
