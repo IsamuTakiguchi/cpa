@@ -1,0 +1,40 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: railway-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      RAILWAY_PROJECT_NAME: ${{ vars.RAILWAY_PROJECT_NAME || 'cpa' }}
+      RAILWAY_WORKSPACE: ${{ vars.RAILWAY_WORKSPACE }}
+      AI_MODEL: ${{ vars.AI_MODEL || 'claude-opus-5' }}
+    steps:
+      - name: Secrets を確認
+        run: |
+          if [ -z "$RAILWAY_API_TOKEN" ]; then
+            echo "::error::GitHub Secrets に RAILWAY_API_TOKEN がありません。Railway → Account Settings → Tokens でトークンを発行し、リポジトリの Settings → Secrets and variables → Actions に登録してください。"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 型チェックと教材の整合性テスト
+        run: npm run typecheck && npx vitest run shared web
+      - name: Railway CLI をインストール
+        run: npm i -g @railway/cli
+      - name: 構築とデプロイ
+        run: bash scripts/railway-deploy.sh

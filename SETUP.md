@@ -2,26 +2,87 @@
 
 このアプリは 1 つの Railway プロジェクトで動きます。
 
-- **web+api サービス**: Node（Hono）が API を提供し、ビルド済みのフロント（Vite/React）を同じ URL で配信します
-- **Postgres サービス**: 学習データの保存先（Railway 公式テンプレート、永続ボリューム付き）
+- **web サービス**: Node（Hono）が API を提供し、ビルド済みのフロント（Vite/React）を同じ URL で配信します
+- **Postgres サービス**: 学習データの保存先（永続ボリューム付き）
 
-所要時間はおよそ 20 分です。料金は Hobby プラン（月 5 ドル、使用量クレジット 5 ドル込み）を想定しています。
+構築はすべて GitHub Actions が自動で行います。**手動作業は次の 3 ステップだけ**です（所要 5〜10 分）。
+料金は Railway の Hobby プラン（月 5 ドル、使用量クレジット 5 ドル込み）を想定しています。
 
 ---
 
-## 1. Railway プロジェクトを作る
+## 自動セットアップ（推奨・3 ステップ）
+
+### ステップ 1: Railway のトークンを発行する
+
+1. https://railway.com にアクセスし、GitHub アカウントでサインアップ（またはログイン）します。
+2. 右上のアイコン → **Account Settings** → **Tokens** → **Create Token**。
+   - Name は `github-actions` など任意。Workspace は「なし（Account token）」のままにします。
+3. 表示されたトークンをコピーします（この画面を閉じると再表示できません）。
+
+### ステップ 2: GitHub にトークンを登録する
+
+1. このリポジトリのページ → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**。
+2. Name に `RAILWAY_API_TOKEN`、Secret にコピーしたトークンを貼り付けて **Add secret**。
+3. AI 採点を使う場合は、同じ手順で `ANTHROPIC_API_KEY` も登録します（https://console.anthropic.com で発行。後からでも構いません）。
+
+### ステップ 3: デプロイを実行する
+
+1. リポジトリの **Actions** タブ → 左の **Deploy to Railway** → 右の **Run workflow** → **Run workflow**。
+2. 5〜10 分ほどで完了します。完了したジョブを開くと **Summary** に次が表示されます。
+   - **URL**（`https://xxxx.up.railway.app`）
+   - **初回登録の招待コード**（初回のみ表示。以後は Railway の web サービス → Variables → `SIGNUP_CODE` で確認）
+   - AI 採点の有効／無効、バックアップ設定の結果
+3. URL を開いて **新規登録**（メールアドレス、10 文字以上のパスワード、招待コード）。最初に登録したユーザーが管理者になります。
+
+以後は `main` ブランチに push するたびに自動で再デプロイされます（教材の追加・修正など）。
+Actions の **Deploy to Railway** → Run workflow で手動再実行もできます。
+
+### 自動セットアップが行うこと
+
+ワークフロー（`.github/workflows/deploy.yml`）が `scripts/railway-deploy.sh` を実行し、次を「無ければ作る」方式で行います。
+2 回目以降は既存の設定をそのまま使い、アプリのデプロイだけ行います。
+
+| 項目 | 内容 |
+|---|---|
+| プロジェクト | `cpa`（リポジトリ Variables の `RAILWAY_PROJECT_NAME` で変更可） |
+| Postgres | Railway 公式の PostgreSQL を追加 |
+| web サービス | このリポジトリを Dockerfile でビルドしてデプロイ |
+| 環境変数 | `DATABASE_URL`（Postgres 参照）、`SESSION_SECRET`（自動生成）、`SIGNUP_CODE`（自動生成）、`ANTHROPIC_API_KEY`（Secrets にあれば）、`AI_MODEL`、`AI_DAILY_LIMIT`、`BACKUP_DIR`、`BACKUP_KEEP`、`COOKIE_SECURE`、`PORT` |
+| ボリューム | `/data` をマウント（サーバー内スナップショットの保存先） |
+| ドメイン | `xxxx.up.railway.app` を発行 |
+| ヘルスチェック | `/api/health` が応答するまで待機 |
+| Railway バックアップ | API で Postgres ボリュームの Daily/Weekly/Monthly バックアップ有効化を試みます。API が対応していない場合は Summary に「Backups タブで有効化」と案内が出るので、その 1 回だけ手動で行ってください |
+
+### 設定を変えたいとき
+
+- **AI モデル**: リポジトリの Settings → Secrets and variables → Actions → **Variables** に `AI_MODEL`（例: `claude-sonnet-5`）を追加して再デプロイ。アプリの設定画面からも切り替えられます。
+- **招待コードを変えたい**: Railway の web サービス → Variables → `SIGNUP_CODE` を編集。
+- **複数のワークスペースがある**: Variables に `RAILWAY_WORKSPACE`（ワークスペース名または ID）を追加。
+
+### うまくいかないとき
+
+- Actions のログの `構築とデプロイ` ステップにエラーが出ます。`RAILWAY_API_TOKEN が設定されていません` → ステップ 2 を確認。`railway whoami に失敗` → トークンが無効（再発行）。
+- ヘルスチェックが 5 分以内に通らない場合は Railway の web サービス → Deployments → ログを確認してください。
+
+---
+
+## 手動で構築したい場合（参考）
+
+自動セットアップを使わず Railway の画面から構築する手順です。所要はおよそ 20 分です。
+
+### 1. Railway プロジェクトを作る
 
 1. https://railway.com にログイン（GitHub アカウントで可）。
 2. **New Project** → **Deploy from GitHub repo** → このリポジトリ（`IsamuTakiguchi/cpa`）を選ぶ。
    - 初回は GitHub 連携の許可を求められます。
 3. サービスが 1 つ作られます（これが web+api サービス）。ビルドは自動で `Dockerfile` が使われます（`railway.json` で指定済み）。
 
-## 2. Postgres を追加する
+### 2. Postgres を追加する
 
 1. プロジェクト画面で **+ Create** → **Database** → **Add PostgreSQL**。
 2. 追加された Postgres サービスの **Variables** タブに `DATABASE_URL` があることを確認します（自動生成）。
 
-## 3. 環境変数を設定する
+### 3. 環境変数を設定する
 
 web+api サービスの **Variables** タブで以下を追加します。
 
@@ -39,19 +100,19 @@ web+api サービスの **Variables** タブで以下を追加します。
 
 > Anthropic API キーは https://console.anthropic.com で発行します。従量課金です。採点 1 回あたりの目安は数円〜十数円です（モデルと答案の長さで変わります）。
 
-## 4. スナップショット用ボリュームを付ける
+### 4. スナップショット用ボリュームを付ける
 
 web+api サービスを右クリック（または **Settings**）→ **Volumes** → **Add Volume** → Mount path に `/data` を指定します。
 ここに毎日の `pg_dump` と、ユーザーごとの学習データ JSON が 30 世代保存されます。
 
-## 5. 公開 URL を発行する
+### 5. 公開 URL を発行する
 
 web+api サービスの **Settings** → **Networking** → **Generate Domain**。
 `xxxx.up.railway.app` のような URL が発行されます。ポートを聞かれたら `3000` を指定します。
 
 デプロイが完了したら `https://<URL>/api/health` を開き、`{"ok":true,...}` が返ることを確認します。
 
-## 6. 初回登録
+### 6. 初回登録
 
 1. 発行された URL を開く → 右上「ゲスト」または左メニュー「ログイン / 登録」→ **新規登録**。
 2. メールアドレス、パスワード（10 文字以上）、`SIGNUP_CODE` に設定した招待コードを入力。
@@ -60,7 +121,7 @@ web+api サービスの **Settings** → **Networking** → **Generate Domain**�
 スマホでも同じ URL を開いてログインすれば、同じデータが同期されます。
 iPhone は Safari の共有ボタン → **ホーム画面に追加**、Android は Chrome のメニュー → **アプリをインストール** でアプリのように使えます。
 
-## 7. Railway のバックアップを有効にする
+### 7. Railway のバックアップを有効にする
 
 Postgres サービスの **Volume** を選び **Backups** タブで、**Daily**（6 日保持）・**Weekly**（27 日保持）・**Monthly**（89 日保持）をすべて有効にします。
 手動バックアップもこの画面から取れます。復元は同じ画面から「Restore」を選ぶと、新しいボリュームとして復元内容がステージされます。
