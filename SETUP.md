@@ -46,7 +46,7 @@ Actions の **Deploy to Railway** → Run workflow で手動再実行もでき�
 |---|---|
 | プロジェクト | `cpa`（リポジトリ Variables の `RAILWAY_PROJECT_NAME` で変更可） |
 | Postgres | Railway 公式の PostgreSQL を追加 |
-| web サービス | このリポジトリを Dockerfile でビルドしてデプロイ |
+| web サービス | GitHub Actions が Dockerfile でイメージをビルドして GHCR（`ghcr.io/<owner>/cpa`）に push し、Railway はそのイメージをデプロイ。Railway 側のビルダー障害の影響を受けず、ビルドログは Actions で確認できる |
 | 環境変数 | `DATABASE_URL`（Postgres 参照）、`SESSION_SECRET`（自動生成）、`SIGNUP_CODE`（自動生成）、`ANTHROPIC_API_KEY`（Secrets にあれば）、`AI_MODEL`、`AI_DAILY_LIMIT`、`BACKUP_DIR`、`BACKUP_KEEP`、`COOKIE_SECURE`、`PORT` |
 | ボリューム | `/data` をマウント（サーバー内スナップショットの保存先） |
 | ドメイン | `xxxx.up.railway.app` を発行 |
@@ -62,6 +62,8 @@ Actions の **Deploy to Railway** → Run workflow で手動再実行もでき�
 ### うまくいかないとき
 
 - Actions のログの `構築とデプロイ` ステップにエラーが出ます。`RAILWAY_API_TOKEN が設定されていません` → ステップ 2 を確認。`railway whoami に失敗` → トークンが無効（再発行）。
+- `デプロイ失敗 (status=FAILED)` と出た場合は、その下の「Railway の診断」とデプロイログに原因が出ます。
+- 「Limited Trial」が原因のときは https://railway.com/verify で認証するか、Hobby プラン（月 5 ドル）に加入して再実行してください。
 - ヘルスチェックが 5 分以内に通らない場合は Railway の web サービス → Deployments → ログを確認してください。
 
 ---

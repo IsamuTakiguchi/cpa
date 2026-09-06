@@ -147,37 +147,89 @@ url="https://${domain}"
 note "URL: $url"
 
 # --- 7. デプロイ ----------------------------------------------------------------
-if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
-  step "デプロイ（ビルドログを表示）"
-  gql() { curl -sS --max-time 30 -H "Authorization: Bearer $RAILWAY_API_TOKEN" -H "Content-Type: application/json" https://backboard.railway.com/graphql/v2 -d "$1"; }
-  deploy_once() {
-    local out
-    out="$(railway up --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --ci 2>&1 | tee /dev/stderr)" || true
-    if echo "$out" | grep -q "Deploy failed\|Build failed\|failed"; then
-      local dep_id
-      dep_id="$(echo "$out" | grep -o 'id=[0-9a-f-]*' | head -1 | cut -d= -f2)"
-      if [[ -n "$dep_id" ]]; then
+# IMAGE（例: ghcr.io/owner/cpa:sha）が指定されていれば、GitHub Actions でビルド済みのイメージを
+# Railway にデプロイする（Railway 側のビルダーを使わない）。未指定なら従来どおり railway up でソースを送る。
+gql() { curl -sS --max-time 30 -H "Authorization: Bearer $RAILWAY_API_TOKEN" -H "Content-Type: application/json" https://backboard.railway.com/graphql/v2 -d "$1"; }
+service_id_of() { railway service list --json 2>/dev/null | json_id_by_name "$1"; }
+environment_id() { railway environment list --json 2>/dev/null | json_id_by_name "$ENVIRONMENT"; }
+
+show_deploy_failure_hints() {
+  echo
+  echo "==> 考えられる原因:"
+  echo "  1) Railway アカウントが Limited Trial（コードのデプロイ不可）: https://railway.com/verify で認証するか、Hobby プランに加入してください"
+  echo "  2) Railway 側の一時障害: しばらく待ってから Actions の Run workflow（Branch: main）で再実行"
+  echo "  3) アプリの起動エラー: 上のデプロイログ（起動時のエラー）を確認"
+}
+
+deploy_image() {
+  local image="$1" svc_id env_id q res dep_id status diag i
+  svc_id="$(service_id_of "$WEB_SERVICE")"
+  env_id="$(environment_id)"
+  [[ -n "$svc_id" && -n "$env_id" ]] || fail "サービス ID / 環境 ID を取得できませんでした (service=$svc_id env=$env_id)"
+  note "イメージを設定: $image"
+  q="$(jq -cn --arg s "$svc_id" --arg e "$env_id" --arg img "$image" '{query:"mutation($s:String!,$e:String!,$input:ServiceInstanceUpdateInput!){ serviceInstanceUpdate(serviceId:$s, environmentId:$e, input:$input) }", variables:{s:$s,e:$e,input:{source:{image:$img},healthcheckPath:"/api/health",healthcheckTimeout:120,restartPolicyType:"ON_FAILURE",restartPolicyMaxRetries:5}}}')"
+  res="$(gql "$q")"
+  echo "$res" | jq -e '.data.serviceInstanceUpdate == true' >/dev/null 2>&1 || fail "サービス設定の更新に失敗: $res"
+  q="$(jq -cn --arg s "$svc_id" --arg e "$env_id" '{query:"mutation($s:String!,$e:String!){ serviceInstanceDeployV2(serviceId:$s, environmentId:$e) }", variables:{s:$s,e:$e}}')"
+  res="$(gql "$q")"
+  dep_id="$(echo "$res" | jq -r '.data.serviceInstanceDeployV2 // empty')"
+  [[ -n "$dep_id" ]] || fail "デプロイの開始に失敗: $res"
+  note "デプロイ開始: $dep_id"
+  for i in $(seq 1 120); do
+    sleep 5
+    q="$(jq -cn --arg id "$dep_id" '{query:"query($id:String!){ deployment(id:$id){ status diagnosis } }", variables:{id:$id}}')"
+    res="$(gql "$q")"
+    status="$(echo "$res" | jq -r '.data.deployment.status // empty')"
+    diag="$(echo "$res" | jq -r '.data.deployment.diagnosis // empty')"
+    printf '  [%3ds] %s\n' $((i*5)) "${status:-?}"
+    case "$status" in
+      SUCCESS) return 0 ;;
+      FAILED|CRASHED|REMOVED)
         echo
-        echo "==> デプロイの状態 (deployment $dep_id):"
-        gql "$(jq -cn --arg id "$dep_id" '{query:"query($id:String!){ deployment(id:$id){ status statusUpdatedAt meta } }", variables:{id:$id}}')" | jq '.' 2>/dev/null || true
-      fi
-      return 1
+        echo "==> デプロイ失敗 (status=$status)"
+        [[ -n "$diag" && "$diag" != "null" ]] && echo "==> Railway の診断: $diag"
+        echo "==> デプロイログ（直近 150 行）:"
+        railway logs --deployment --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 150 2>&1 | tail -150 || true
+        return 1 ;;
+    esac
+  done
+  echo "==> 10 分以内に完了しませんでした (status=$status)"
+  return 1
+}
+
+deploy_source_once() {
+  local out dep_id
+  out="$(railway up --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --ci 2>&1 | tee /dev/stderr)" || true
+  if echo "$out" | grep -q "Deploy failed\|Build failed\|failed"; then
+    dep_id="$(echo "$out" | grep -o 'id=[0-9a-f-]*' | head -1 | cut -d= -f2)"
+    if [[ -n "$dep_id" ]]; then
+      echo "==> デプロイの状態 (deployment $dep_id):"
+      gql "$(jq -cn --arg id "$dep_id" '{query:"query($id:String!){ deployment(id:$id){ status diagnosis } }", variables:{id:$id}}')" | jq '.' 2>/dev/null || true
     fi
-    return 0
-  }
-  if ! deploy_once; then
-    echo
-    echo "==> ビルドログ（直近 200 行）:"
-    railway logs --build --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 200 2>&1 | tail -200 || true
-    echo "==> Railway 側の一時的なビルド障害の可能性があるため、20 秒後に 1 回だけ再試行します"
-    sleep 20
-    if ! deploy_once; then
-      echo
-      echo "==> 2 回目も失敗しました。考えられる原因:"
-      echo "  1) Railway アカウントが Limited Trial（コードのデプロイ不可）: https://railway.com/verify で認証するか、Hobby プランに加入してください"
-      echo "  2) Metal ビルダーの一時障害: Railway の web サービス → Settings → Build → 'Metal build environment' をオフにして再実行"
-      echo "  3) Dockerfile のビルドエラー: 上のビルドログを確認"
-      fail "railway up が失敗しました"
+    return 1
+  fi
+  return 0
+}
+
+if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
+  if [[ -n "${IMAGE:-}" ]]; then
+    step "デプロイ（GitHub Actions でビルドしたイメージ）"
+    if ! deploy_image "$IMAGE"; then
+      show_deploy_failure_hints
+      fail "イメージのデプロイに失敗しました"
+    fi
+  else
+    step "デプロイ（ソースをアップロードして Railway でビルド）"
+    if ! deploy_source_once; then
+      echo "==> ビルドログ（直近 200 行）:"
+      railway logs --build --service "$WEB_SERVICE" --environment "$ENVIRONMENT" --lines 200 2>&1 | tail -200 || true
+      echo "==> 20 秒後に 1 回だけ再試行します"
+      sleep 20
+      if ! deploy_source_once; then
+        show_deploy_failure_hints
+        echo "  4) Metal ビルダーの障害: GitHub Actions からの IMAGE 指定デプロイ（deploy.yml）を使うと回避できます"
+        fail "railway up が失敗しました"
+      fi
     fi
   fi
   step "起動を待機"
@@ -192,7 +244,6 @@ fi
 # --- 8. Railway 側バックアップスケジュール（ベストエフォート） --------------------
 step "Railway のボリュームバックアップを設定（ベストエフォート）"
 backup_note="Railway の画面で Postgres ボリューム → Backups タブから Daily/Weekly/Monthly を有効にしてください（1 回だけ）"
-gql() { curl -sS --max-time 30 -H "Authorization: Bearer $RAILWAY_API_TOKEN" -H "Content-Type: application/json" https://backboard.railway.com/graphql/v2 -d "$1"; }
 if mutations="$(gql '{"query":"{ __type(name: \"Mutation\") { fields { name } } }"}' 2>/dev/null | jq -r '.data.__type.fields[].name' 2>/dev/null)" && echo "$mutations" | grep -q '^volumeInstanceBackupScheduleUpdate$'; then
   vol_q="$(jq -cn --arg id "$project_id" '{query:"query($id:String!){ project(id:$id){ volumes{ edges{ node{ id name volumeInstances{ edges{ node{ id serviceId environmentId } } } } } } services{ edges{ node{ id name } } } } }", variables:{id:$id}}')"
   if proj="$(gql "$vol_q" 2>/dev/null)"; then

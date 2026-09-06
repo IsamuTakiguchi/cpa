@@ -9,10 +9,14 @@ concurrency:
   group: railway-deploy
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -34,7 +38,35 @@ jobs:
       - run: npm ci
       - name: 型チェックと教材の整合性テスト
         run: npm run typecheck && npx vitest run shared web
+      - name: イメージ名を決める
+        id: image
+        run: |
+          OWNER="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          echo "name=ghcr.io/${OWNER}/cpa" >> "$GITHUB_OUTPUT"
+      - name: GHCR にログイン
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Docker イメージをビルドして GHCR に push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
+            ${{ steps.image.outputs.name }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Railway CLI をインストール
         run: npm i -g @railway/cli
       - name: 構築とデプロイ
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}:${{ github.sha }}
         run: bash scripts/railway-deploy.sh
