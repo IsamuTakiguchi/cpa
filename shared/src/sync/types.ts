@@ -129,6 +129,8 @@ export interface SummaryScope {
   includeWeakQuestions: boolean;
   includeMyAnswers: boolean;
   includeMemos: boolean;
+  /** 図解（Mermaid）を含める */
+  includeDiagrams?: boolean;
 }
 
 export interface SummaryNote extends SyncMeta {

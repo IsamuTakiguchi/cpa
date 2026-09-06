@@ -64,6 +64,26 @@ describe("コンテンツ整合性", () => {
     }
   });
 
+  it("各論点に図解が1枚以上あり、id が一意で本文が空でない", () => {
+    const ids = new Set<string>();
+    for (const t of allTopics()) {
+      const ds = t.diagrams ?? [];
+      expect(ds.length, `${t.id} の図解`).toBeGreaterThanOrEqual(1);
+      for (const d of ds) {
+        expect(d.id.startsWith(t.id + "-fig-"), d.id).toBe(true);
+        expect(ids.has(d.id), `重複 diagram id: ${d.id}`).toBe(false);
+        ids.add(d.id);
+        expect(d.mermaid.trim().length, d.id).toBeGreaterThan(20);
+        expect(d.caption.trim().length, d.id).toBeGreaterThan(5);
+        expect(d.keyPoints.length, d.id).toBeGreaterThanOrEqual(1);
+      }
+    }
+    for (const s of SUBJECTS) {
+      expect(s.systemMap.mermaid.includes("TODO"), `${s.id} の体系マップがプレースホルダのまま`).toBe(false);
+      expect(Object.keys(s.systemMap.nodeTopics).length, `${s.id} の nodeTopics`).toBe(s.topics.length);
+    }
+  });
+
   it("各科目に本試験1回分の大問論述がある", () => {
     for (const f of EXAM_FORMATS) {
       const subject = SUBJECTS.find((s) => s.id === f.subject)!;

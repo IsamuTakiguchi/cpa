@@ -18,6 +18,7 @@ export const DEFAULT_SCOPE: SummaryScope = {
   includeWeakQuestions: true,
   includeMyAnswers: false,
   includeMemos: true,
+  includeDiagrams: true,
 };
 
 export function topicsInScope(scope: SummaryScope): Topic[] {
@@ -42,6 +43,13 @@ export function buildSummaryMarkdown({ scope, attempts, progress }: SummaryInput
     if (p?.bookmarked) lines.push("> ★ ブックマーク済み", "");
     if (scope.includeNotes === "summary") lines.push(t.summary.trim(), "");
     else if (scope.includeNotes === "full") lines.push(demoteHeadings(t.note.trim()), "");
+    if (scope.includeDiagrams && t.diagrams?.length) {
+      lines.push("### 図解", "");
+      for (const d of t.diagrams) {
+        lines.push(`**${d.title}**`, "", "```mermaid", d.mermaid.trim(), "```", "", d.caption, "");
+        if (d.keyPoints.length) lines.push(...d.keyPoints.map((k) => `- ${k}`), "");
+      }
+    }
     if (scope.includeMemos && p?.memo?.trim()) lines.push("### 自分のメモ", "", p.memo.trim(), "");
     if (scope.includeCards && t.cards.length) {
       lines.push("### 暗記カード", "", "| 問 | 答 |", "|---|---|");

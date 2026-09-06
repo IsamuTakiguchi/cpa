@@ -3,6 +3,7 @@ import { SUBJECTS, topicQuestionCount } from "@cpa/shared";
 import { useAttempts, useCardStates, useTopicProgress } from "../hooks/useData";
 import { latestAttemptByQuestion, accuracyOf } from "../lib/stats";
 import { PageTitle, pct, ProgressBar, SubjectChip } from "../components/ui";
+import { SystemMapView } from "../components/SystemMapView";
 
 const MASTERY = ["未着手", "一読", "演習中", "仕上がり"];
 
@@ -18,6 +19,7 @@ export function SubjectsPage() {
   return (
     <div>
       <PageTitle title={subjectId ? (subjects[0]?.name ?? "科目") : "科目・論点"} subtitle={subjectId ? subjects[0]?.examNote : "論点を選んでインプット（ノート）と演習へ"} />
+      {!subjectId && <p className="text-xs text-slate-500 mb-2">科目名をタップすると、学習状況で色分けされた体系マップが表示されます。</p>}
       {!subjectId && (
         <div className="flex gap-2 mb-4 overflow-x-auto">
           {SUBJECTS.map((s) => (
@@ -34,6 +36,11 @@ export function SubjectsPage() {
               <h2 className="font-bold mb-2 flex items-center gap-2">
                 <SubjectChip subject={s.id} /> {s.name} <span className="text-xs text-slate-500 font-normal">{s.examNote}</span>
               </h2>
+            )}
+            {subjectId && (
+              <div className="mb-4">
+                <SystemMapView subject={s} progress={progress} attempts={attempts} />
+              </div>
             )}
             <div className="space-y-2">
               {s.topics.map((t) => {

@@ -99,7 +99,18 @@ input {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
 }
 
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+.break-inside-avoid {
+  break-inside: avoid;
+}
+
 @media print {
+  .mermaid {
+    break-inside: avoid;
+  }
   .no-print {
     display: none !important;
   }

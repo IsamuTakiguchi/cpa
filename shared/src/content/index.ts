@@ -1,8 +1,8 @@
 import type { ExamFormat, QuestionKind, QuestionRef, Subject, SubjectId, Topic } from "./types";
-import { financialTopics } from "./financial";
-import { managerialTopics } from "./managerial";
-import { auditTopics } from "./audit";
-import { taxTopics } from "./tax";
+import { financialSystemMap, financialTopics } from "./financial";
+import { managerialSystemMap, managerialTopics } from "./managerial";
+import { auditSystemMap, auditTopics } from "./audit";
+import { taxSystemMap, taxTopics } from "./tax";
 
 export const SUBJECTS: Subject[] = [
   {
@@ -12,6 +12,7 @@ export const SUBJECTS: Subject[] = [
     examNote: "会計学（午前）2時間・大問2",
     color: "#0f766e",
     topics: sortTopics(managerialTopics),
+    systemMap: managerialSystemMap,
   },
   {
     id: "financial",
@@ -20,6 +21,7 @@ export const SUBJECTS: Subject[] = [
     examNote: "会計学（午後）3時間・大問3",
     color: "#1d4ed8",
     topics: sortTopics(financialTopics),
+    systemMap: financialSystemMap,
   },
   {
     id: "audit",
@@ -28,6 +30,7 @@ export const SUBJECTS: Subject[] = [
     examNote: "2時間・大問2",
     color: "#7c3aed",
     topics: sortTopics(auditTopics),
+    systemMap: auditSystemMap,
   },
   {
     id: "tax",
@@ -36,6 +39,7 @@ export const SUBJECTS: Subject[] = [
     examNote: "2時間・大問2（理論＋計算）",
     color: "#b45309",
     topics: sortTopics(taxTopics),
+    systemMap: taxSystemMap,
   },
 ];
 
@@ -122,6 +126,11 @@ export function essayMaxScore(q: Topic["essays"][number]): number {
 
 export function miniMaxScore(q: Topic["miniEssays"][number]): number {
   return q.points.reduce((s, p) => s + p.score, 0);
+}
+
+/** 全図解（論点図解のみ） */
+export function allDiagrams(): { topic: Topic; diagram: import("./types").Diagram }[] {
+  return allTopics().flatMap((t) => (t.diagrams ?? []).map((diagram) => ({ topic: t, diagram })));
 }
 
 export function topicQuestionCount(t: Topic): Record<QuestionKind, number> {

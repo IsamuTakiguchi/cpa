@@ -3,12 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import { getSubject, getTopic, KIND_LABELS, type QuestionKind, type SessionConfig } from "@cpa/shared";
 import { Markdown } from "../components/Markdown";
 import { KindChip, PageTitle, pct, SubjectChip } from "../components/ui";
+import { DiagramCard } from "../components/DiagramCard";
 import { useAttempts, useCardStates, useTopicProgress } from "../hooks/useData";
 import { useStartSession } from "../hooks/useStartSession";
 import { markNoteRead, updateTopicProgress } from "../lib/repo";
 import { accuracyOf, latestAttemptByQuestion } from "../lib/stats";
 
-type Tab = "note" | "cards" | "questions" | "memo";
+type Tab = "note" | "diagrams" | "cards" | "questions" | "memo";
 
 export function TopicDetailPage() {
   const { topicId = "" } = useParams();
@@ -74,9 +75,9 @@ export function TopicDetailPage() {
         </button>
       </div>
       <div className="flex border-b border-slate-200 mb-4 no-print">
-        {(["note", "cards", "questions", "memo"] as Tab[]).map((t) => (
+        {(["note", "diagrams", "cards", "questions", "memo"] as Tab[]).map((t) => (
           <button key={t} className={`px-4 py-2 text-sm -mb-px border-b-2 ${tab === t ? "border-brand text-brand font-semibold" : "border-transparent text-slate-500"}`} onClick={() => setTab(t)}>
-            {{ note: "ノート", cards: `カード (${topic.cards.length})`, questions: `問題 (${rows.length})`, memo: "メモ" }[t]}
+            {{ note: "ノート", diagrams: `図解 (${topic.diagrams?.length ?? 0})`, cards: `カード (${topic.cards.length})`, questions: `問題 (${rows.length})`, memo: "メモ" }[t]}
           </button>
         ))}
       </div>
@@ -86,7 +87,21 @@ export function TopicDetailPage() {
             <div className="font-semibold text-amber-900 mb-1">直前確認（結論）</div>
             <Markdown>{topic.summary}</Markdown>
           </div>
+          {(topic.diagrams?.length ?? 0) > 0 && (
+            <button className="btn-secondary text-xs mb-3 no-print" onClick={() => setTab("diagrams")}>
+              図で全体像を見る（{topic.diagrams!.length} 枚）→
+            </button>
+          )}
           <Markdown>{topic.note}</Markdown>
+        </div>
+      )}
+      {tab === "diagrams" && (
+        <div className="space-y-4">
+          {(topic.diagrams ?? []).length === 0 ? (
+            <div className="card text-sm text-slate-500">この論点の図解はまだありません。</div>
+          ) : (
+            topic.diagrams!.map((d) => <DiagramCard key={d.id} diagram={d} />)
+          )}
         </div>
       )}
       {tab === "cards" && (

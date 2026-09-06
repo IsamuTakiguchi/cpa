@@ -180,7 +180,7 @@ export function HomePage() {
       </section>
 
       <section>
-        <h2 className="font-bold mb-2">科目別の進捗</h2>
+        <h2 className="font-bold mb-2">科目別の進捗 <span className="text-xs font-normal text-slate-500">（科目をタップすると体系マップ）</span></h2>
         <div className="space-y-2">
           {stats.map((s) => (
             <Link key={s.subject} to={`/subjects/${s.subject}`} className="card flex items-center gap-3 hover:shadow-md transition">

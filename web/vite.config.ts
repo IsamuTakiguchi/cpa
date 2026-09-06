@@ -38,5 +38,5 @@ export default defineConfig({
     port: 5173,
     proxy: { "/api": "http://localhost:3000" },
   },
-  build: { outDir: "dist", sourcemap: false },
+  build: { outDir: "dist", sourcemap: false, chunkSizeWarningLimit: 1200 },
 });

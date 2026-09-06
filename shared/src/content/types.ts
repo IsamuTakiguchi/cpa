@@ -101,6 +101,38 @@ export interface CalcQuestion {
   difficulty: Difficulty;
 }
 
+/** 図解の種類 */
+export type DiagramKind = "flow" | "decision" | "tree" | "relation" | "timeline" | "mindmap";
+
+/**
+ * 図解（Mermaid 記法）。体系的理解のためのビジュアル教材。
+ * - flow: 処理の流れ（例: 収益認識の5ステップ）
+ * - decision: 判断の分岐（例: 減損の兆候→認識→測定）
+ * - tree: 分類ツリー（例: 有価証券の分類と評価）
+ * - relation: 概念・主体の関係（例: 親会社・子会社・非支配株主）
+ * - timeline: 時系列（例: 監査のプロセス）
+ * - mindmap: 論点の全体像
+ */
+export interface Diagram {
+  id: string;
+  title: string;
+  kind: DiagramKind;
+  /** Mermaid のソース（flowchart / mindmap / timeline など） */
+  mermaid: string;
+  /** 図の読み方・要点（1〜2文） */
+  caption: string;
+  /** この図で押さえること（2〜4項目） */
+  keyPoints: string[];
+}
+
+/** 科目の体系マップ（論点の位置づけを示す 1 枚の図） */
+export interface SystemMap {
+  /** Mermaid のソース（flowchart 推奨）。論点ノードの id は nodeTopics のキーと一致させる */
+  mermaid: string;
+  /** Mermaid ノード id → 論点 id。進捗による色分けとクリック遷移に使う */
+  nodeTopics: Record<string, string>;
+}
+
 /** 論点 */
 export interface Topic {
   id: string;
@@ -120,6 +152,8 @@ export interface Topic {
   miniEssays: MiniEssayQuestion[];
   essays: EssayQuestion[];
   calcs: CalcQuestion[];
+  /** 図解（1 論点 2〜3 枚を目安） */
+  diagrams?: Diagram[];
 }
 
 export interface Subject {
@@ -130,6 +164,8 @@ export interface Subject {
   examNote: string;
   color: string;
   topics: Topic[];
+  /** 科目の体系マップ */
+  systemMap: SystemMap;
 }
 
 /** 本試験形式の科目別構成 */

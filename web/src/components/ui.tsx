@@ -63,7 +63,7 @@ export function Modal({ open, onClose, title, children, footer }: { open: boolea
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4 no-print" onClick={onClose}>
-      <div className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+      <div className="w-full sm:max-w-lg md:max-w-4xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="px-5 pt-4 pb-2 font-bold text-lg border-b border-slate-100">{title}</div>
         <div className="px-5 py-4 overflow-y-auto text-sm">{children}</div>
         {footer && <div className="px-5 py-3 border-t border-slate-100 flex justify-end gap-2">{footer}</div>}

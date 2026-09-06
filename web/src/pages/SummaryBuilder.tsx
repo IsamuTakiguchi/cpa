@@ -109,6 +109,9 @@ export function SummaryBuilderPage() {
               </select>
             </div>
             <label className="flex items-center gap-2">
+              <input type="checkbox" checked={scope.includeDiagrams ?? true} onChange={(e) => setScope({ ...scope, includeDiagrams: e.target.checked })} /> 図解（体系図・フロー図）
+            </label>
+            <label className="flex items-center gap-2">
               <input type="checkbox" checked={scope.includeCards} onChange={(e) => setScope({ ...scope, includeCards: e.target.checked })} /> 暗記カード一覧（表）
             </label>
             <label className="flex items-center gap-2">
