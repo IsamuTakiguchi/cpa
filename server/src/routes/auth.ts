@@ -7,6 +7,7 @@ import { env } from "../env";
 import { hashPassword, verifyPassword } from "../auth/password";
 import { RateLimiter } from "../auth/rateLimit";
 import { createSession, destroySession, resolveUser, type AppEnv } from "../auth/session";
+import { googleEnabled, googleRoutes, redirectUri, type GoogleHttp } from "../auth/google";
 
 const credentials = z.object({
   email: z.string().trim().toLowerCase().email().max(200),
@@ -22,8 +23,9 @@ function clientKey(headers: Headers, extra: string) {
   return `${ip}:${extra}`;
 }
 
-export function authRoutes(db: Db) {
+export function authRoutes(db: Db, googleHttp?: GoogleHttp) {
   const app = new Hono<AppEnv>();
+  app.route("/google", googleRoutes(db, googleHttp));
 
   app.post("/signup", async (c) => {
     if (!limiter.hit(clientKey(c.req.raw.headers, "signup"))) return c.json({ error: "試行回数が多すぎます。しばらく待ってください" }, 429);
@@ -46,7 +48,7 @@ export function authRoutes(db: Db) {
     const key = clientKey(c.req.raw.headers, parsed.data.email);
     if (!limiter.hit(key)) return c.json({ error: "試行回数が多すぎます。15分後に再試行してください" }, 429);
     const [user] = await db.select().from(users).where(eq(users.email, parsed.data.email)).limit(1);
-    const ok = user ? await verifyPassword(parsed.data.password, user.passwordHash) : false;
+    const ok = user?.passwordHash ? await verifyPassword(parsed.data.password, user.passwordHash) : false;
     if (!user || !ok) return c.json({ error: "メールアドレスまたはパスワードが違います" }, 401);
     limiter.reset(key);
     await createSession(db, user.id, c.req.header("user-agent"), c);
@@ -60,7 +62,7 @@ export function authRoutes(db: Db) {
 
   app.get("/me", async (c) => {
     const user = await resolveUser(db, c);
-    return c.json({ user, aiEnabled: env.anthropicApiKey !== "", aiModel: env.aiModel });
+    return c.json({ user, aiEnabled: env.anthropicApiKey !== "", aiModel: env.aiModel, googleEnabled: googleEnabled(), googleRedirectUri: redirectUri(c) });
   });
 
   return app;

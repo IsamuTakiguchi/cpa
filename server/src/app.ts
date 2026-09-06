@@ -13,7 +13,7 @@ import { aiRoutes } from "./routes/ai";
 import { backupRoutes } from "./routes/backup";
 import { env } from "./env";
 
-export function createApp(db: Db, opts: { serveWeb?: boolean; log?: boolean } = {}) {
+export function createApp(db: Db, opts: { serveWeb?: boolean; log?: boolean; googleHttp?: import("./auth/google").GoogleHttp } = {}) {
   const app = new Hono<AppEnv>();
   if (opts.log) app.use(logger());
   app.use(
@@ -40,7 +40,7 @@ export function createApp(db: Db, opts: { serveWeb?: boolean; log?: boolean } = 
   api.use("*", csrfGuard);
   api.use("*", bodyLimit({ maxSize: 20 * 1024 * 1024, onError: (c) => c.json({ error: "リクエストが大きすぎます" }, 413) }));
   api.get("/health", (c) => c.json({ ok: true, time: new Date().toISOString() }));
-  api.route("/auth", authRoutes(db));
+  api.route("/auth", authRoutes(db, opts.googleHttp));
   api.use("/sync/*", requireAuth(db));
   api.use("/sync", requireAuth(db));
   api.route("/sync", syncRoutes(db));

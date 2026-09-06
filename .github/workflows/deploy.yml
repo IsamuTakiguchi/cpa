@@ -20,6 +20,9 @@ jobs:
     env:
       RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      ALLOWED_EMAILS: ${{ vars.ALLOWED_EMAILS }}
       RAILWAY_PROJECT_NAME: ${{ vars.RAILWAY_PROJECT_NAME || 'cpa' }}
       RAILWAY_WORKSPACE: ${{ vars.RAILWAY_WORKSPACE }}
       AI_MODEL: ${{ vars.AI_MODEL || 'claude-opus-5' }}

@@ -106,6 +106,17 @@ else
   set_var SIGNUP_CODE "$signup_code_new"
   echo "  SIGNUP_CODE: 生成しました"
 fi
+if [[ -n "${GOOGLE_CLIENT_ID:-}" && -n "${GOOGLE_CLIENT_SECRET:-}" ]]; then
+  set_var GOOGLE_CLIENT_ID "$GOOGLE_CLIENT_ID"
+  set_var GOOGLE_CLIENT_SECRET "$GOOGLE_CLIENT_SECRET"
+  echo "  GOOGLE_CLIENT_ID/SECRET: 設定しました（Google ログイン 有効）"
+  google_status="有効"
+elif has_var GOOGLE_CLIENT_ID; then
+  google_status="有効（既存の設定）"
+else
+  google_status="無効（GitHub Secrets に GOOGLE_CLIENT_ID と GOOGLE_CLIENT_SECRET を追加して再デプロイすると有効になります。SETUP.md 参照）"
+fi
+if [[ -n "${ALLOWED_EMAILS:-}" ]]; then set_var ALLOWED_EMAILS "$ALLOWED_EMAILS"; echo "  ALLOWED_EMAILS: 設定しました"; fi
 if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
   set_var ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY"
   echo "  ANTHROPIC_API_KEY: 設定しました（AI 採点 有効）"
@@ -270,6 +281,8 @@ note "$backup_note"
     echo "- 招待コード: 設定済み（Railway の web サービス → Variables → SIGNUP_CODE で確認）"
   fi
   echo "- AI 採点: $ai_status"
+  echo "- Google ログイン: $google_status"
+  echo "  - Google Cloud Console の OAuth クライアントに登録するリダイレクト URI: \`$url/api/auth/google/callback\`"
   echo "- バックアップ: $backup_note"
   for l in "${summary_lines[@]:-}"; do [[ -n "$l" ]] && echo "$l"; done
   echo

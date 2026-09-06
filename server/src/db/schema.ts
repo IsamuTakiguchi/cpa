@@ -4,7 +4,10 @@ import { boolean, date, index, integer, jsonb, pgTable, primaryKey, text, timest
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  /** Google ログインのみのユーザーは null */
+  passwordHash: text("password_hash"),
+  /** Google アカウントの subject（sub）。Google ログインで紐付く */
+  googleSub: text("google_sub").unique(),
   /** 最初に登録したユーザー。DB全体のダンプをダウンロードできる */
   isAdmin: boolean("is_admin").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -53,6 +53,28 @@ Actions の **Deploy to Railway** → Run workflow で手動再実行もでき�
 | ヘルスチェック | `/api/health` が応答するまで待機 |
 | Railway バックアップ | API で Postgres ボリュームの Daily/Weekly/Monthly バックアップ有効化を試みます。API が対応していない場合は Summary に「Backups タブで有効化」と案内が出るので、その 1 回だけ手動で行ってください |
 
+### Google アカウント（Gmail）でログインできるようにする（任意）
+
+Google の OAuth クライアントを 1 つ作り、その ID とシークレットを GitHub Secrets に登録します（所要 5 分・1 回だけ）。
+
+1. https://console.cloud.google.com/ を開き、プロジェクトを作成（名前は任意。例: `cpa-app`）。
+2. 左メニュー **API とサービス** → **OAuth 同意画面**（「Google Auth Platform」と表示される場合もあります）→ **開始**。
+   - アプリ名: `CPA 論文式`、ユーザーサポートメール: 自分のメール、対象: **外部**、連絡先メール: 自分のメール → 作成。
+   - 「テストユーザー」の画面が出たら、ログインに使う自分の Gmail アドレスを追加します（公開ステータスが「テスト」のままでもテストユーザーはログインできます）。
+3. **クライアント** → **クライアントを作成** → 種類 **ウェブ アプリケーション**。
+   - 名前: 任意
+   - **承認済みのリダイレクト URI** に次を追加: `https://<あなたの URL>/api/auth/google/callback`
+     （URL は Actions の Summary か Railway の web サービスに表示されています。例: `https://web-production-b6a87.up.railway.app/api/auth/google/callback`）
+   - 作成すると **クライアント ID** と **クライアント シークレット** が表示されるのでコピー。
+4. GitHub の Settings → Secrets and variables → Actions に `GOOGLE_CLIENT_ID` と `GOOGLE_CLIENT_SECRET` を登録。
+5. Actions → **Deploy to Railway** → Run workflow（Branch: main）。完了後、ログイン画面に「Google アカウントでログイン」が表示されます。
+
+アカウントの扱い:
+
+- 既にメールアドレスとパスワードで登録済みなら、**同じメールアドレスの Google アカウント**でログインすると同じデータに紐付きます。
+- まだ誰も登録していなければ、最初に Google でログインした人が管理者になります。
+- それ以外のメールアドレスは登録できません（第三者のログイン防止）。家族など別のアカウントを許可したい場合は、リポジトリの Variables に `ALLOWED_EMAILS`（カンマ区切り）を追加して再デプロイしてください。
+
 ### 設定を変えたいとき
 
 - **AI モデル**: リポジトリの Settings → Secrets and variables → Actions → **Variables** に `AI_MODEL`（例: `claude-sonnet-5`）を追加して再デプロイ。アプリの設定画面からも切り替えられます。

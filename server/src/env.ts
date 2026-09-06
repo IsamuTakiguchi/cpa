@@ -20,6 +20,16 @@ export const env = {
   backupKeep: Number(process.env.BACKUP_KEEP ?? 30),
   cookieSecure: (process.env.COOKIE_SECURE ?? (isProd ? "true" : "false")) === "true",
   webDist: process.env.WEB_DIST ?? "./web/dist",
+  /** Google ログイン（Sign in with Google）。両方設定されたときだけ有効 */
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  /** 公開 URL（省略時はリクエストの Host から組み立てる） */
+  publicUrl: (process.env.PUBLIC_URL ?? "").replace(/\/$/, ""),
+  /** Google ログインで新規作成を許可するメールアドレス（カンマ区切り）。空なら「最初のユーザーのみ」 */
+  allowedEmails: (process.env.ALLOWED_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
   /** セッション有効期間（日） */
   sessionDays: 30,
 };

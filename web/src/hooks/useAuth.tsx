@@ -7,6 +7,7 @@ interface AuthState {
   user: MeResponse["user"] | undefined;
   aiEnabled: boolean;
   aiModel: string;
+  googleEnabled: boolean;
   /** サーバーに到達できない（ローカル開発で API 無し等） */
   serverUnavailable: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -21,14 +22,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<MeResponse["user"] | undefined>(undefined);
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiModel, setAiModel] = useState("");
+  const [googleEnabled, setGoogleEnabled] = useState(false);
   const [serverUnavailable, setServerUnavailable] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
       const me = await api.me();
+      // Google ログインから戻ってきた直後: この端末のゲストデータをアカウントに取り込む
+      let pending = false;
+      try {
+        pending = localStorage.getItem("cpa.oauthPending") === "1";
+        if (pending) localStorage.removeItem("cpa.oauthPending");
+      } catch {
+        pending = false;
+      }
+      if (me.user && pending) await syncEngine.enqueueAll();
       setUser(me.user);
       setAiEnabled(me.aiEnabled);
       setAiModel(me.aiModel);
+      setGoogleEnabled(me.googleEnabled ?? false);
       setServerUnavailable(false);
     } catch (e) {
       setUser(null);
@@ -69,7 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
-  const value = useMemo<AuthState>(() => ({ user, aiEnabled, aiModel, serverUnavailable, login, signup, logout, refresh }), [user, aiEnabled, aiModel, serverUnavailable, login, signup, logout, refresh]);
+  const value = useMemo<AuthState>(
+    () => ({ user, aiEnabled, aiModel, googleEnabled, serverUnavailable, login, signup, logout, refresh }),
+    [user, aiEnabled, aiModel, googleEnabled, serverUnavailable, login, signup, logout, refresh],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

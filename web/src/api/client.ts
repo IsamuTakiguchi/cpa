@@ -30,6 +30,8 @@ export interface MeResponse {
   user: { id: string; email: string; isAdmin: boolean } | null;
   aiEnabled: boolean;
   aiModel: string;
+  googleEnabled: boolean;
+  googleRedirectUri: string;
 }
 
 export const api = {
