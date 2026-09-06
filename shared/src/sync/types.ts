@@ -147,6 +147,10 @@ export interface UserSettings extends SyncMeta {
   aiModel: string;
   dailyGoalMinutes: number;
   lastExportAt: string | null;
+  /** 受験区分（手続きリマインドの対象を決める）。未設定なら全期限を表示 */
+  examTrack?: "tanto1" | "tanto2" | "exempt" | "";
+  /** 手続きチェックリストの完了状態（item id → 完了日時 ISO） */
+  procedureChecks?: Record<string, string>;
 }
 
 export interface SyncPayload {

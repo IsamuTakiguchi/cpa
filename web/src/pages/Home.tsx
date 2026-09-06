@@ -8,6 +8,7 @@ import { examPreset, PRESETS, type Preset } from "../lib/sessionPlanner";
 import { daysUntil, dueCardCount, studyMinutesByDay, subjectStats } from "../lib/stats";
 import { Alert, formatDate, Modal, pct, ProgressBar, SubjectChip } from "../components/ui";
 import { abandonSession } from "../lib/repo";
+import { formatJpDate, pendingChecklist, upcomingEvents } from "../lib/examSchedule";
 
 export function HomePage() {
   const settings = useSettings();
@@ -28,6 +29,9 @@ export function HomePage() {
   const minutes = studyMinutesByDay(sessions, 14);
   const todayMin = minutes[minutes.length - 1]?.minutes ?? 0;
   const lastExport = settings.lastExportAt ? (Date.now() - new Date(settings.lastExportAt).getTime()) / 86400000 : null;
+  const track = settings.examTrack ?? "";
+  const upcoming = upcomingEvents(track, new Date(), 30).filter((e) => e.kind === "deadline" || e.kind === "exam");
+  const pending = pendingChecklist(track, settings.procedureChecks, new Date(), 30);
 
   const run = async (preset: Preset, subjects?: SubjectId[]) => {
     setPicking(null);
@@ -63,6 +67,38 @@ export function HomePage() {
       </section>
 
       {error && <Alert kind="warn">{error}</Alert>}
+      {(upcoming.length > 0 || pending.length > 0) && (
+        <section className="rounded-xl border-2 border-red-300 bg-red-50 p-4">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h2 className="font-bold text-red-800">手続きの期限が近づいています</h2>
+            <Link to="/procedures" className="text-sm text-red-800 underline">
+              手続き一覧へ
+            </Link>
+          </div>
+          <ul className="space-y-1 text-sm">
+            {upcoming.slice(0, 3).map((e) => (
+              <li key={e.id} className="flex justify-between gap-2">
+                <span>
+                  {e.title}
+                  <span className="text-slate-500">（{formatJpDate(e.endDate ?? e.date)}{e.time ? ` ${e.time}` : ""}）</span>
+                </span>
+                <span className="font-bold text-red-700 shrink-0">{e.days === 0 ? "今日" : `あと${e.days}日`}</span>
+              </li>
+            ))}
+            {pending.slice(0, 3).map((c) => (
+              <li key={c.id} className="flex justify-between gap-2">
+                <span>☐ {c.title}</span>
+                <span className={`font-bold shrink-0 ${c.days < 0 ? "text-red-700" : "text-amber-700"}`}>{c.days < 0 ? "期限超過" : c.days === 0 ? "今日" : `あと${c.days}日`}</span>
+              </li>
+            ))}
+          </ul>
+          {!track && (
+            <p className="text-xs text-slate-600 mt-2">
+              <Link to="/procedures" className="underline">受験区分</Link>を設定すると、自分に関係する期限だけが表示されます。
+            </p>
+          )}
+        </section>
+      )}
       {!user && (
         <Alert kind="info">
           ゲストモードです。データはこの端末に保存されます。PC とスマホで同期するには <Link to="/auth" className="underline font-medium">ログイン</Link> してください。
@@ -210,7 +246,7 @@ export function HomePage() {
       )}
 
       <p className="text-xs text-slate-400 leading-5">
-        教材は AI が作成した学習補助資料です。2027年試験の適用基準・法令（租税法は試験年4月1日現在の法令）に照らして、必ず原典・基準書で確認してください。
+        教材は AI が作成した学習補助資料です。2027年論文式試験の法令基準日は 2027年4月1日（租税法は 2027年1月1日）です。<Link to="/procedures" className="underline">適用基準・法令</Link>を確認のうえ、必ず原典・基準書で確認してください。
       </p>
 
       <Modal open={!!picking} onClose={() => setPicking(null)} title={picking?.title ?? ""}>

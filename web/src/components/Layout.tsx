@@ -9,6 +9,7 @@ const NAV = [
   { to: "/review", label: "復習", icon: "🔁" },
   { to: "/summaries", label: "まとめ", icon: "📝" },
   { to: "/history", label: "履歴", icon: "📈" },
+  { to: "/procedures", label: "手続き", icon: "📅" },
   { to: "/settings", label: "設定", icon: "⚙️" },
 ];
 
