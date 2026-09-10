@@ -29,9 +29,8 @@ export function HomePage() {
   const minutes = studyMinutesByDay(sessions, 14);
   const todayMin = minutes[minutes.length - 1]?.minutes ?? 0;
   const lastExport = settings.lastExportAt ? (Date.now() - new Date(settings.lastExportAt).getTime()) / 86400000 : null;
-  const track = settings.examTrack ?? "";
-  const upcoming = upcomingEvents(track, new Date(), 30).filter((e) => e.kind === "deadline" || e.kind === "exam");
-  const pending = pendingChecklist(track, settings.procedureChecks, new Date(), 30);
+  const upcoming = upcomingEvents(new Date(), 30).filter((e) => e.kind === "deadline" || e.kind === "exam");
+  const pending = pendingChecklist(settings.procedureChecks, new Date(), 30);
 
   const run = async (preset: Preset, subjects?: SubjectId[]) => {
     setPicking(null);
@@ -92,11 +91,6 @@ export function HomePage() {
               </li>
             ))}
           </ul>
-          {!track && (
-            <p className="text-xs text-slate-600 mt-2">
-              <Link to="/procedures" className="underline">受験区分</Link>を設定すると、自分に関係する期限だけが表示されます。
-            </p>
-          )}
         </section>
       )}
       {!user && (

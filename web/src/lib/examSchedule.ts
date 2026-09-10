@@ -1,11 +1,11 @@
-import { EXAM_CHECKLIST, EXAM_EVENTS, type ChecklistItem, type ExamEvent, type ExamTrack } from "@cpa/shared";
+import { EXAM_CHECKLIST, EXAM_EVENTS, type ChecklistItem, type ExamEvent } from "@cpa/shared";
 
-export function eventsForTrack(track: ExamTrack | "" | undefined): ExamEvent[] {
-  return EXAM_EVENTS.filter((e) => !track || !e.tracks || e.tracks.includes(track)).sort((a, b) => a.date.localeCompare(b.date));
+export function allEvents(): ExamEvent[] {
+  return [...EXAM_EVENTS].sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function checklistForTrack(track: ExamTrack | "" | undefined): ChecklistItem[] {
-  return EXAM_CHECKLIST.filter((c) => !track || !c.tracks || c.tracks.includes(track));
+export function allChecklist(): ChecklistItem[] {
+  return EXAM_CHECKLIST;
 }
 
 export function daysFrom(dateStr: string, now = new Date()): number {
@@ -14,17 +14,17 @@ export function daysFrom(dateStr: string, now = new Date()): number {
   return Math.round((target.getTime() - start.getTime()) / 86400000);
 }
 
-/** 期限が今日〜withinDays 日以内、または期間中のイベント（deadline/exam を優先） */
-export function upcomingEvents(track: ExamTrack | "" | undefined, now = new Date(), withinDays = 30): (ExamEvent & { days: number })[] {
-  return eventsForTrack(track)
+/** 期限が今日〜withinDays 日以内、または期間中のイベント */
+export function upcomingEvents(now = new Date(), withinDays = 30): (ExamEvent & { days: number })[] {
+  return allEvents()
     .map((e) => ({ ...e, days: daysFrom(e.endDate ?? e.date, now) }))
     .filter((e) => e.days >= 0 && e.days <= withinDays)
     .sort((a, b) => a.days - b.days);
 }
 
 /** 未完了で期限が近い（または過ぎた）チェック項目 */
-export function pendingChecklist(track: ExamTrack | "" | undefined, checks: Record<string, string> | undefined, now = new Date(), withinDays = 30) {
-  return checklistForTrack(track)
+export function pendingChecklist(checks: Record<string, string> | undefined, now = new Date(), withinDays = 30) {
+  return allChecklist()
     .filter((c) => c.due && !checks?.[c.id])
     .map((c) => ({ ...c, days: daysFrom(c.due!, now) }))
     .filter((c) => c.days <= withinDays)
@@ -50,7 +50,7 @@ export function googleCalendarUrl(e: ExamEvent): string {
   return `https://calendar.google.com/calendar/render?${p.toString()}`;
 }
 
-/** 全イベントの iCalendar（.ics）テキスト。前日と当日の通知付き */
+/** 全イベントの iCalendar（.ics）テキスト。期限・試験日には1週間前・前日の通知付き */
 export function buildIcs(events: ExamEvent[]): string {
   const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
