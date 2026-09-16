@@ -40,7 +40,7 @@ export function CalcQ({ q, phase = "full", initialAnswer, onDraft, onDone }: Que
         </button>
       ) : (
         <div className="mt-4">
-          <div className={`rounded-lg p-3 ${result.allCorrect ? "bg-emerald-50 border border-emerald-200" : "bg-amber-50 border border-amber-200"}`}>
+          <div className={`rounded-xl p-3 animate-pop ${result.allCorrect ? "bg-emerald-50/80 border border-emerald-200" : "bg-amber-50/80 border border-amber-200"}`}>
             <div className="font-bold">
               {result.allCorrect ? "全問正解" : `${result.perAnswer.filter(Boolean).length} / ${q.answers.length} 正解`}
             </div>

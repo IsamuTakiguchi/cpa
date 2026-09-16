@@ -105,7 +105,7 @@ export function Mermaid({ code, onRendered, className = "", zoomable = true, tit
 
   if (error) {
     return (
-      <details className="rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800">
+      <details className="rounded-xl border border-red-200/80 bg-red-50/70 p-2 text-xs text-red-800">
         <summary>図を描画できませんでした</summary>
         <pre className="mt-1 whitespace-pre-wrap">{error}</pre>
         <pre className="mt-1 whitespace-pre-wrap text-slate-600">{code}</pre>
@@ -115,9 +115,9 @@ export function Mermaid({ code, onRendered, className = "", zoomable = true, tit
   return (
     <div className={`relative ${className}`}>
       {!svg && <div className="h-24 flex items-center justify-center text-xs text-slate-400">図を読み込み中…</div>}
-      <div ref={ref} className="mermaid overflow-x-auto" dangerouslySetInnerHTML={{ __html: svg }} />
+      <div ref={ref} className="mermaid overflow-x-auto rounded-xl bg-white/80 p-2" dangerouslySetInnerHTML={{ __html: svg }} />
       {zoomable && svg && (
-        <button className="absolute top-1 right-1 btn-ghost text-xs bg-white/80 no-print" onClick={() => setZoom(true)} aria-label="拡大表示">
+        <button className="absolute top-2 right-2 btn-secondary text-xs py-1 px-2.5 no-print" onClick={() => setZoom(true)} aria-label="拡大表示">
           ⤢ 拡大
         </button>
       )}

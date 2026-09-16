@@ -40,7 +40,7 @@ export function MiniEssayQ({ q, phase = "full", initialAnswer, onDraft, onDone, 
         </button>
       ) : (
         <div className="mt-3 space-y-3">
-          <div className="card bg-slate-50">
+          <div className="rounded-xl glass-inset p-4">
             <div className="text-sm font-semibold text-slate-700 mb-1">模範解答</div>
             <p className="text-sm leading-7 whitespace-pre-wrap">{q.modelAnswer}</p>
           </div>

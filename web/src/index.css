@@ -4,7 +4,62 @@
   --color-brand: #1e3a5f;
   --color-brand-light: #2d5a8e;
   --color-accent: #f59e0b;
+  --color-ink: #0f172a;
   --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", system-ui, -apple-system, sans-serif;
+  --ease-liquid: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --animate-rise: rise 0.32s var(--ease-liquid) both;
+  --animate-fade-in: fade-in 0.18s ease-out both;
+  --animate-sheet-up: sheet-up 0.3s var(--ease-liquid) both;
+  --animate-pop: pop 0.22s var(--ease-liquid) both;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
 }
 
 html {
@@ -12,7 +67,7 @@ html {
 }
 
 body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+  @apply bg-[#f5f7ff] text-slate-800 antialiased;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -21,11 +76,252 @@ input {
   font-size: 16px; /* iOS のズーム防止 */
 }
 
+/* ---------- 背景: グラデーション + 動く光のにじみ ---------- */
+.glass-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 45%, #fdf2f8 100%);
+}
+.glass-bg span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.5;
+  will-change: transform;
+  animation: drift 38s ease-in-out infinite alternate;
+}
+.glass-bg span:nth-child(1) {
+  width: 55vmax;
+  height: 55vmax;
+  left: -15vmax;
+  top: -20vmax;
+  background: #93c5fd;
+}
+.glass-bg span:nth-child(2) {
+  width: 45vmax;
+  height: 45vmax;
+  right: -12vmax;
+  top: 10vh;
+  background: #fcd34d;
+  opacity: 0.4;
+  animation-duration: 46s;
+  animation-delay: -12s;
+}
+.glass-bg span:nth-child(3) {
+  width: 50vmax;
+  height: 50vmax;
+  left: 20vw;
+  bottom: -25vmax;
+  background: #99f6e4;
+  animation-duration: 42s;
+  animation-delay: -25s;
+}
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6vw, -4vh, 0) scale(1.12);
+  }
+  to {
+    transform: translate3d(-4vw, 6vh, 0) scale(0.95);
+  }
+}
+
+/* ---------- ガラス面 ---------- */
+@utility glass {
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 8px 32px rgba(30, 58, 95, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+}
+@utility glass-strong {
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 16px 48px rgba(30, 58, 95, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+@utility glass-dark {
+  background: rgba(15, 23, 42, 0.78);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+}
+@utility glass-inset {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 2px rgba(30, 58, 95, 0.06);
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1 rounded-xl px-4 py-2 text-sm font-medium select-none disabled:opacity-50 disabled:cursor-not-allowed;
+  transition:
+    transform 0.18s var(--ease-liquid),
+    background-color 0.2s,
+    box-shadow 0.2s,
+    filter 0.2s,
+    color 0.2s;
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+@layer components {
+  .card {
+    @apply glass rounded-2xl p-4;
+    transition:
+      transform 0.25s var(--ease-liquid),
+      box-shadow 0.25s var(--ease-liquid),
+      background-color 0.25s;
+  }
+  a.card:hover,
+  button.card:hover,
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 40px rgba(30, 58, 95, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.68);
+  }
+  a.card:active,
+  button.card:active,
+  .card-hover:active {
+    transform: scale(0.985);
+  }
+
+  .btn-primary {
+    @apply btn text-white;
+    background-image: linear-gradient(135deg, var(--color-brand-light) 0%, var(--color-brand) 100%);
+    box-shadow:
+      0 6px 20px -6px rgba(30, 58, 95, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.12);
+    box-shadow:
+      0 10px 26px -8px rgba(30, 58, 95, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-secondary {
+    @apply btn text-slate-700;
+    background: rgba(255, 255, 255, 0.6);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+      0 2px 10px rgba(30, 58, 95, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .btn-ghost {
+    @apply btn text-slate-600;
+  }
+  .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.55);
+  }
+  .btn-danger {
+    @apply btn text-white;
+    background-image: linear-gradient(135deg, #ef4444, #b91c1c);
+    box-shadow: 0 6px 20px -6px rgba(185, 28, 28, 0.6);
+  }
+  .btn-danger:hover {
+    filter: brightness(1.1);
+  }
+
+  .input {
+    @apply w-full rounded-xl px-3 py-2 text-base text-slate-900 focus:outline-none;
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      inset 0 1px 2px rgba(30, 58, 95, 0.06),
+      0 1px 0 rgba(255, 255, 255, 0.6);
+    transition:
+      box-shadow 0.2s,
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  .input:focus {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(30, 58, 95, 0.45);
+    box-shadow:
+      0 0 0 3px rgba(30, 58, 95, 0.15),
+      inset 0 1px 2px rgba(30, 58, 95, 0.04);
+  }
+  .label {
+    @apply block text-sm font-medium text-slate-600 mb-1;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  }
+
+  /* タブ（下線式） */
+  .tabs {
+    @apply flex overflow-x-auto;
+    border-bottom: 1px solid rgba(30, 58, 95, 0.12);
+  }
+  .tab {
+    @apply px-4 py-2 text-sm -mb-px border-b-2 whitespace-nowrap border-transparent text-slate-500;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .tab:hover {
+    @apply text-slate-800;
+  }
+  .tab-active {
+    @apply border-brand text-brand font-semibold;
+  }
+
+  /* 見出しのグラデーション文字 */
+  .text-gradient {
+    background-image: linear-gradient(120deg, var(--color-brand) 0%, var(--color-brand-light) 55%, #6d8fbf 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ページ遷移 */
+  .page-enter {
+    animation: var(--animate-rise);
+  }
+}
+
+/* backdrop-filter 非対応ブラウザ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .card {
+    background: rgba(255, 255, 255, 0.92);
+  }
+  .glass-strong {
+    background: #fff;
+  }
+  .glass-dark {
+    background: #0f172a;
+  }
+}
+
+/* ---------- ノート本文 ---------- */
 .prose-note {
   @apply text-[15px] leading-7;
 }
 .prose-note h1 {
-  @apply mt-8 mb-3 text-xl font-bold text-slate-900 border-b-2 border-slate-300 pb-1;
+  @apply mt-8 mb-3 text-xl font-bold text-slate-900 border-b-2 border-slate-300/70 pb-1;
 }
 .prose-note h2 {
   @apply mt-6 mb-2 text-lg font-bold text-brand border-l-4 border-brand pl-2;
@@ -49,54 +345,26 @@ input {
   @apply my-0.5;
 }
 .prose-note strong {
-  @apply font-bold text-slate-900 bg-amber-50 px-0.5 rounded;
+  @apply font-bold text-slate-900 bg-amber-100/70 px-0.5 rounded;
 }
 .prose-note table {
   @apply my-3 w-full text-sm border-collapse;
 }
 .prose-note th,
 .prose-note td {
-  @apply border border-slate-300 px-2 py-1 align-top;
+  @apply border border-slate-300/70 px-2 py-1 align-top;
 }
 .prose-note th {
-  @apply bg-slate-100;
+  @apply bg-white/60;
 }
 .prose-note blockquote {
   @apply border-l-4 border-slate-300 pl-3 text-slate-600 my-2;
 }
 .prose-note code {
-  @apply bg-slate-100 px-1 rounded text-[13px];
+  @apply bg-white/70 px-1 rounded text-[13px];
 }
 .prose-note hr {
-  @apply my-4 border-slate-200;
-}
-
-@utility btn {
-  @apply inline-flex items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed select-none;
-}
-.btn-primary {
-  @apply btn bg-brand text-white hover:bg-brand-light active:bg-brand;
-}
-.btn-secondary {
-  @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50;
-}
-.btn-ghost {
-  @apply btn text-slate-600 hover:bg-slate-100;
-}
-.btn-danger {
-  @apply btn bg-red-600 text-white hover:bg-red-700;
-}
-.card {
-  @apply rounded-xl bg-white shadow-sm border border-slate-200 p-4;
-}
-.input {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand;
-}
-.label {
-  @apply block text-sm font-medium text-slate-600 mb-1;
-}
-.chip {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  @apply my-4 border-slate-900/10;
 }
 
 .mermaid svg {
@@ -107,7 +375,50 @@ input {
   break-inside: avoid;
 }
 
+/* ---------- 動きを減らす設定 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .glass-bg span {
+    animation: none;
+  }
+  .page-enter,
+  .animate-rise,
+  .animate-fade-in,
+  .animate-sheet-up,
+  .animate-pop,
+  .animate-shimmer {
+    animation: none !important;
+  }
+  a.card:hover,
+  button.card:hover,
+  .card-hover:hover,
+  a.card:active,
+  button.card:active,
+  .card-hover:active {
+    transform: none;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ---------- 印刷 ---------- */
 @media print {
+  .glass-bg {
+    display: none !important;
+  }
+  .glass,
+  .glass-strong,
+  .glass-inset,
+  .card {
+    background: #fff !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-color: #cbd5e1 !important;
+  }
+  .page-enter {
+    animation: none !important;
+  }
   .mermaid {
     break-inside: avoid;
     overflow: visible !important;
@@ -121,7 +432,7 @@ input {
     display: none !important;
   }
   body {
-    background: white;
+    background: white !important;
     color: black;
     padding: 0;
   }

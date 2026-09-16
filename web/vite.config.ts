@@ -14,8 +14,8 @@ const pwa = process.env.NO_PWA
         short_name: "CPA論文",
         description: "2027年公認会計士試験（論文式）対策: 会計学・監査論・租税法",
         lang: "ja",
-        theme_color: "#1e3a5f",
-        background_color: "#f8fafc",
+        theme_color: "#f5f7ff",
+        background_color: "#f5f7ff",
         display: "standalone",
         start_url: "/",
         icons: [

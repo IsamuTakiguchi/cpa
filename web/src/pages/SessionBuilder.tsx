@@ -69,7 +69,7 @@ export function SessionBuilderPage() {
           <label className="label">科目（未選択＝全科目）</label>
           <div className="flex flex-wrap gap-2">
             {SUBJECTS.map((s) => (
-              <button key={s.id} className={`chip py-1.5 px-3 border ${subjects.includes(s.id) ? "text-white" : "bg-white text-slate-700"}`} style={subjects.includes(s.id) ? { backgroundColor: s.color, borderColor: s.color } : {}} onClick={() => { setSubjects(toggle(subjects, s.id)); setTopicIds([]); }}>
+              <button key={s.id} className={`chip py-1.5 px-3 border transition-colors ${subjects.includes(s.id) ? "text-white" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} style={subjects.includes(s.id) ? { backgroundColor: s.color, borderColor: s.color } : {}} onClick={() => { setSubjects(toggle(subjects, s.id)); setTopicIds([]); }}>
                 {s.name}
               </button>
             ))}
@@ -77,13 +77,13 @@ export function SessionBuilderPage() {
         </div>
         <div>
           <label className="label">論点（未選択＝すべて）</label>
-          <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 p-2 space-y-2">
+          <div className="max-h-48 overflow-y-auto rounded-xl glass-inset p-2 space-y-2">
             {visibleTopics.map((s) => (
               <div key={s.id}>
                 <div className="text-xs font-semibold text-slate-500 mb-1">{s.name}</div>
                 <div className="flex flex-wrap gap-1">
                   {s.topics.map((t) => (
-                    <button key={t.id} className={`chip border ${topicIds.includes(t.id) ? "bg-brand text-white border-brand" : "bg-white text-slate-700"}`} onClick={() => setTopicIds(toggle(topicIds, t.id))}>
+                    <button key={t.id} className={`chip border transition-colors ${topicIds.includes(t.id) ? "bg-brand text-white border-brand" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} onClick={() => setTopicIds(toggle(topicIds, t.id))}>
                       {t.title}
                     </button>
                   ))}
@@ -96,7 +96,7 @@ export function SessionBuilderPage() {
           <label className="label">形式（複数可）</label>
           <div className="flex flex-wrap gap-2">
             {KIND_ORDER.map((k) => (
-              <button key={k} className={`chip py-1.5 px-3 border ${kinds.includes(k) ? "bg-brand text-white border-brand" : "bg-white text-slate-700"}`} onClick={() => setKinds(toggle(kinds, k))}>
+              <button key={k} className={`chip py-1.5 px-3 border transition-colors ${kinds.includes(k) ? "bg-brand text-white border-brand" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} onClick={() => setKinds(toggle(kinds, k))}>
                 {KIND_LABELS[k]}
               </button>
             ))}
@@ -126,7 +126,7 @@ export function SessionBuilderPage() {
             未出題の問題を優先
           </label>
         </div>
-        <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm flex items-center justify-between">
+        <div className="rounded-xl glass-inset p-3 text-sm flex items-center justify-between">
           <div>
             出題予定: <span className="font-bold">{preview.questionIds.length} 問</span>　所要目安 約{preview.estimatedMinutes}分
           </div>

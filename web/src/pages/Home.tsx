@@ -41,33 +41,35 @@ export function HomePage() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl bg-gradient-to-br from-brand to-brand-light text-white p-5 shadow">
-        <div className="text-sm text-white/80">2027年 論文式試験（{settings.examDate.replace(/-/g, "/")}）まで</div>
-        <div className="text-4xl font-bold mt-1">
-          {days > 0 ? `${days} 日` : days === 0 ? "本日" : "終了"}
-        </div>
-        <div className="grid grid-cols-3 gap-3 mt-4 text-center">
-          <div className="rounded-lg bg-white/10 py-2">
-            <div className="text-xs text-white/70">今日の復習カード</div>
-            <div className="text-xl font-bold">{due}</div>
-          </div>
-          <div className="rounded-lg bg-white/10 py-2">
-            <div className="text-xs text-white/70">今日の学習</div>
-            <div className="text-xl font-bold">
-              {todayMin}
-              <span className="text-xs font-normal">/{settings.dailyGoalMinutes}分</span>
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand via-brand-light to-[#4f7cb3] text-white p-5 shadow-[0_20px_50px_-20px_rgba(30,58,95,.7)] ring-1 ring-white/20">
+        <span className="pointer-events-none absolute -top-16 -right-10 h-52 w-52 rounded-full bg-white/20 blur-3xl" aria-hidden />
+        <span className="pointer-events-none absolute -bottom-20 left-10 h-44 w-44 rounded-full bg-accent/30 blur-3xl" aria-hidden />
+        <div className="relative">
+          <div className="text-sm text-white/80">2027年 論文式試験（{settings.examDate.replace(/-/g, "/")}）まで</div>
+          <div className="text-4xl font-bold mt-1 tabular-nums tracking-tight">{days > 0 ? `${days} 日` : days === 0 ? "本日" : "終了"}</div>
+          <div className="grid grid-cols-3 gap-3 mt-4 text-center">
+            <div className="rounded-xl bg-white/15 backdrop-blur ring-1 ring-white/25 py-2">
+              <div className="text-xs text-white/70">今日の復習カード</div>
+              <div className="text-xl font-bold tabular-nums">{due}</div>
             </div>
-          </div>
-          <div className="rounded-lg bg-white/10 py-2">
-            <div className="text-xs text-white/70">解答数</div>
-            <div className="text-xl font-bold">{attempts.length}</div>
+            <div className="rounded-xl bg-white/15 backdrop-blur ring-1 ring-white/25 py-2">
+              <div className="text-xs text-white/70">今日の学習</div>
+              <div className="text-xl font-bold tabular-nums">
+                {todayMin}
+                <span className="text-xs font-normal">/{settings.dailyGoalMinutes}分</span>
+              </div>
+            </div>
+            <div className="rounded-xl bg-white/15 backdrop-blur ring-1 ring-white/25 py-2">
+              <div className="text-xs text-white/70">解答数</div>
+              <div className="text-xl font-bold tabular-nums">{attempts.length}</div>
+            </div>
           </div>
         </div>
       </section>
 
       {error && <Alert kind="warn">{error}</Alert>}
       {(upcoming.length > 0 || pending.length > 0) && (
-        <section className="rounded-xl border-2 border-red-300 bg-red-50 p-4">
+        <section className="rounded-2xl border border-red-300/80 bg-red-50/70 backdrop-blur p-4 shadow-[0_8px_32px_rgba(220,38,38,.10)]">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h2 className="font-bold text-red-800">手続きの期限が近づいています</h2>
             <Link to="/procedures" className="text-sm text-red-800 underline">
@@ -139,7 +141,7 @@ export function HomePage() {
         <h2 className="font-bold mb-2">すぐ始める</h2>
         <div className="grid grid-cols-2 gap-2">
           {PRESETS.map((p) => (
-            <button key={p.id} className="card text-left hover:shadow-md transition" onClick={() => setPicking(p)}>
+            <button key={p.id} className="card text-left" onClick={() => setPicking(p)}>
               <div className="font-semibold">{p.title}</div>
               <div className="text-xs text-slate-500 mt-1 leading-5">{p.description}</div>
               <div className="text-xs text-brand mt-2">約{p.minutes}分</div>
@@ -150,7 +152,7 @@ export function HomePage() {
           {EXAM_FORMATS.map((f) => (
             <button
               key={f.subject}
-              className="card text-left hover:shadow-md transition border-l-4"
+              className="card text-left border-l-4"
               style={{ borderLeftColor: SUBJECTS.find((s) => s.id === f.subject)!.color }}
               onClick={async () => {
                 setError(null);
@@ -177,7 +179,7 @@ export function HomePage() {
         <h2 className="font-bold mb-2">科目別の進捗 <span className="text-xs font-normal text-slate-500">（科目をタップすると体系マップ）</span></h2>
         <div className="space-y-2">
           {stats.map((s) => (
-            <Link key={s.subject} to={`/subjects/${s.subject}`} className="card flex items-center gap-3 hover:shadow-md transition">
+            <Link key={s.subject} to={`/subjects/${s.subject}`} className="card flex items-center gap-3">
               <SubjectChip subject={s.subject} />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between text-sm">
@@ -202,7 +204,7 @@ export function HomePage() {
               const max = Math.max(30, ...minutes.map((x) => x.minutes));
               return (
                 <div key={m.day} className="flex-1 flex flex-col items-center justify-end h-full" title={`${m.day}: ${m.minutes}分`}>
-                  <div className="w-full rounded-t bg-brand/80" style={{ height: `${Math.max(2, (m.minutes / max) * 100)}%` }} />
+                  <div className="w-full rounded-t bg-gradient-to-t from-brand to-brand-light/80 transition-[height] duration-700 ease-[cubic-bezier(.2,.8,.2,1)]" style={{ height: `${Math.max(2, (m.minutes / max) * 100)}%` }} />
                 </div>
               );
             })}
@@ -219,7 +221,7 @@ export function HomePage() {
           <h2 className="font-bold mb-2">最近の結果</h2>
           <div className="space-y-2">
             {recent.map((s) => (
-              <Link key={s.id} to={`/session/${s.id}/result`} className="card flex items-center justify-between hover:shadow-md transition">
+              <Link key={s.id} to={`/session/${s.id}/result`} className="card flex items-center justify-between">
                 <div>
                   <div className="font-medium text-sm">{s.config.title}</div>
                   <div className="text-xs text-slate-500">{formatDate(s.endedAt!)}</div>

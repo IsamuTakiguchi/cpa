@@ -16,7 +16,7 @@ export function GradingChecklist({ points, checked, onChange, disabled = false }
           const on = checked.includes(i);
           return (
             <li key={i}>
-              <label className={`flex items-start gap-2 rounded-lg border px-3 py-2 cursor-pointer ${on ? "bg-emerald-50 border-emerald-300" : "bg-white border-slate-200"} ${disabled ? "opacity-70 cursor-default" : ""}`}>
+              <label className={`flex items-start gap-2 rounded-lg border px-3 py-2 cursor-pointer ${on ? "bg-emerald-50/80 border-emerald-300" : "bg-white/60 border-white/80 hover:bg-white/85"} ${disabled ? "opacity-70 cursor-default" : ""}`}>
                 <input type="checkbox" className="mt-1" checked={on} disabled={disabled} onChange={() => onChange(on ? checked.filter((x) => x !== i) : [...checked, i].sort())} />
                 <span className="flex-1 text-sm">{p.text}</span>
                 <span className="text-xs text-slate-500 shrink-0">{p.score}点</span>

@@ -44,7 +44,7 @@ export function SessionResultPage() {
           <div className="text-sm font-semibold mb-2">形式別</div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
             {Object.entries(r.perKind).map(([k, v]) => (
-              <div key={k} className="rounded bg-slate-50 p-2 flex justify-between">
+              <div key={k} className="rounded-lg glass-inset p-2 flex justify-between">
                 <span>{KIND_LABELS[k as keyof typeof KIND_LABELS] ?? k}</span>
                 <span className="font-semibold">{v.maxScore > 0 ? `${v.score}/${v.maxScore}点` : `${v.correct}/${v.count}`}</span>
               </div>

@@ -66,7 +66,7 @@ export function SummaryBuilderPage() {
           <label className="label">科目（未選択＝全科目）</label>
           <div className="flex flex-wrap gap-2">
             {SUBJECTS.map((s) => (
-              <button key={s.id} className={`chip py-1.5 px-3 border ${scope.subjects.includes(s.id) ? "text-white" : "bg-white text-slate-700"}`} style={scope.subjects.includes(s.id) ? { backgroundColor: s.color, borderColor: s.color } : {}} onClick={() => setScope({ ...scope, subjects: toggle(scope.subjects, s.id) as SubjectId[], topicIds: [] })}>
+              <button key={s.id} className={`chip py-1.5 px-3 border transition-colors ${scope.subjects.includes(s.id) ? "text-white" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} style={scope.subjects.includes(s.id) ? { backgroundColor: s.color, borderColor: s.color } : {}} onClick={() => setScope({ ...scope, subjects: toggle(scope.subjects, s.id) as SubjectId[], topicIds: [] })}>
                 {s.name}
               </button>
             ))}
@@ -74,13 +74,13 @@ export function SummaryBuilderPage() {
         </div>
         <div>
           <label className="label">論点（未選択＝すべて）</label>
-          <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 p-2 space-y-2">
+          <div className="max-h-44 overflow-y-auto rounded-xl glass-inset p-2 space-y-2">
             {visibleSubjects.map((s) => (
               <div key={s.id}>
                 <div className="text-xs font-semibold text-slate-500 mb-1">{s.name}</div>
                 <div className="flex flex-wrap gap-1">
                   {s.topics.map((t) => (
-                    <button key={t.id} className={`chip border ${scope.topicIds.includes(t.id) ? "bg-brand text-white border-brand" : "bg-white text-slate-700"}`} onClick={() => setScope({ ...scope, topicIds: toggle(scope.topicIds, t.id) })}>
+                    <button key={t.id} className={`chip border transition-colors ${scope.topicIds.includes(t.id) ? "bg-brand text-white border-brand" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} onClick={() => setScope({ ...scope, topicIds: toggle(scope.topicIds, t.id) })}>
                       {t.title}
                     </button>
                   ))}
@@ -125,7 +125,7 @@ export function SummaryBuilderPage() {
             </label>
           </div>
         </div>
-        <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm flex items-center justify-between">
+        <div className="rounded-xl glass-inset p-3 text-sm flex items-center justify-between">
           <div>
             対象 <span className="font-bold">{topicCount} 論点</span>　約{Math.max(1, Math.round(preview.length / 1200))}ページ（{preview.length.toLocaleString()}字）
           </div>

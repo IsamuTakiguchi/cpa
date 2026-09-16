@@ -49,9 +49,9 @@ export function ProceduresPage() {
         </ul>
       </div>
 
-      <div className="flex border-b border-slate-200 no-print overflow-x-auto">
+      <div className="tabs no-print">
         {(["schedule", "checklist", "exemption", "standards"] as Tab[]).map((t) => (
-          <button key={t} className={`px-4 py-2 text-sm -mb-px border-b-2 whitespace-nowrap ${tab === t ? "border-brand text-brand font-semibold" : "border-transparent text-slate-500"}`} onClick={() => setTab(t)}>
+          <button key={t} className={`tab ${tab === t ? "tab-active" : ""}`} onClick={() => setTab(t)}>
             {{ schedule: "日程", checklist: `チェックリスト (${done}/${checklist.length})`, exemption: "免除申請・当日", standards: "適用基準・法令" }[t]}
           </button>
         ))}
@@ -71,7 +71,7 @@ export function ProceduresPage() {
             const past = days < 0;
             const urgent = !past && days <= 14 && (e.kind === "deadline" || e.kind === "exam");
             return (
-              <div key={e.id} className={`card ${past ? "opacity-60" : ""} ${urgent ? "border-red-300 bg-red-50/40" : ""}`}>
+              <div key={e.id} className={`card ${past ? "opacity-60" : ""} ${urgent ? "border-red-300/80 bg-red-50/50" : ""}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-xs text-slate-500">
@@ -179,7 +179,7 @@ export function ProceduresPage() {
                 </thead>
                 <tbody>
                   {EXAM_TIMETABLE.map((r, i) => (
-                    <tr key={i} className={`border-b border-slate-100 ${r.attend ? "" : "text-slate-400"}`}>
+                    <tr key={i} className={`border-b border-slate-900/8 ${r.attend ? "" : "text-slate-400"}`}>
                       <td className="py-1.5 pr-2 whitespace-nowrap">
                         {r.day}
                         <br />
@@ -214,7 +214,7 @@ export function ProceduresPage() {
             <div className="font-bold mb-2">法令基準日（2027年 論文式試験）</div>
             <table className="w-full text-sm">
               <tbody>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-slate-900/8">
                   <td className="py-1.5 pr-3 text-slate-500">会計学・監査論</td>
                   <td>{formatJpDate(APPLICABLE_STANDARDS.ronbunBasisDate)} 現在 施行（適用）の法令等</td>
                 </tr>

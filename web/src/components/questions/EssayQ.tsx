@@ -37,7 +37,7 @@ export function EssayQ({ q, phase = "full", initialAnswer, onDraft, onDone, aiMo
       </div>
       <div className="flex gap-1 mt-4 overflow-x-auto no-print">
         {q.subQuestions.map((sq, i) => (
-          <button key={sq.label} className={`btn text-xs py-1.5 ${i === active ? "bg-brand text-white" : "bg-white border border-slate-300"}`} onClick={() => setActive(i)}>
+          <button key={sq.label} className={`text-xs py-1.5 ${i === active ? "btn-primary" : "btn-secondary"}`} onClick={() => setActive(i)}>
             {sq.label}（{sq.allocation}点）{submitted && checks[sq.label]?.length ? " ✓" : ""}
           </button>
         ))}
@@ -54,7 +54,7 @@ export function EssayQ({ q, phase = "full", initialAnswer, onDraft, onDone, aiMo
           <div className="text-right text-xs text-slate-400 mt-1">{(subs[sq.label] ?? "").length} 字</div>
           {submitted && (
             <div className="mt-2 space-y-3">
-              <div className="card bg-slate-50">
+              <div className="rounded-xl glass-inset p-4">
                 <div className="text-sm font-semibold text-slate-700 mb-1">模範解答</div>
                 <p className="text-sm leading-7 whitespace-pre-wrap">{sq.modelAnswer}</p>
               </div>

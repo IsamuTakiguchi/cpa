@@ -51,7 +51,7 @@ export function AiGradePanel({ questionId, subLabel, answerText, feedback, onGra
           </div>
           <ul className="space-y-1">
             {feedback.pointResults.map((p, i) => (
-              <li key={i} className="rounded border border-indigo-100 bg-white px-3 py-2">
+              <li key={i} className="rounded-lg border border-indigo-100/80 bg-white/70 px-3 py-2">
                 <div className="flex justify-between gap-2">
                   <span className="font-medium">{p.text}</span>
                   <span className={`shrink-0 font-bold ${p.score >= p.maxScore ? "text-emerald-700" : p.score > 0 ? "text-amber-700" : "text-red-700"}`}>
@@ -68,7 +68,7 @@ export function AiGradePanel({ questionId, subLabel, answerText, feedback, onGra
           </div>
           <div>
             <div className="font-semibold text-indigo-900">改善答案</div>
-            <p className="whitespace-pre-wrap bg-white rounded border border-indigo-100 p-2">{feedback.improvedAnswer}</p>
+            <p className="whitespace-pre-wrap bg-white/70 rounded-lg border border-indigo-100/80 p-2">{feedback.improvedAnswer}</p>
           </div>
         </div>
       )}

@@ -74,16 +74,16 @@ export function TopicDetailPage() {
           この論点で30分
         </button>
       </div>
-      <div className="flex border-b border-slate-200 mb-4 no-print">
+      <div className="tabs mb-4 no-print">
         {(["note", "diagrams", "cards", "questions", "memo"] as Tab[]).map((t) => (
-          <button key={t} className={`px-4 py-2 text-sm -mb-px border-b-2 ${tab === t ? "border-brand text-brand font-semibold" : "border-transparent text-slate-500"}`} onClick={() => setTab(t)}>
+          <button key={t} className={`tab ${tab === t ? "tab-active" : ""}`} onClick={() => setTab(t)}>
             {{ note: "ノート", diagrams: `図解 (${topic.diagrams?.length ?? 0})`, cards: `カード (${topic.cards.length})`, questions: `問題 (${rows.length})`, memo: "メモ" }[t]}
           </button>
         ))}
       </div>
       {tab === "note" && (
         <div className="card">
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 mb-4 text-sm">
+          <div className="rounded-xl bg-amber-50/70 border border-amber-200/80 p-3 mb-4 text-sm">
             <div className="font-semibold text-amber-900 mb-1">直前確認（結論）</div>
             <Markdown>{topic.summary}</Markdown>
           </div>
@@ -150,7 +150,7 @@ export function TopicDetailPage() {
             <label className="label">仕上がり度</label>
             <div className="flex gap-2">
               {["未着手", "一読", "演習中", "仕上がり"].map((l, i) => (
-                <button key={l} className={`btn text-xs ${progress?.mastery === i ? "bg-brand text-white" : "bg-white border border-slate-300"}`} onClick={() => updateTopicProgress(topic.id, topic.subject, { mastery: i })}>
+                <button key={l} className={`text-xs ${progress?.mastery === i ? "btn-primary" : "btn-secondary"}`} onClick={() => updateTopicProgress(topic.id, topic.subject, { mastery: i })}>
                   {l}
                 </button>
               ))}

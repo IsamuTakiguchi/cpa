@@ -23,7 +23,7 @@ export function TfQ({ q, onDone }: QuestionProps<TrueFalseQuestion>) {
         </div>
       ) : (
         <div className="mt-4">
-          <div className={`rounded-lg p-3 ${correct ? "bg-emerald-50 border border-emerald-200" : "bg-red-50 border border-red-200"}`}>
+          <div className={`rounded-xl p-3 animate-pop ${correct ? "bg-emerald-50/80 border border-emerald-200" : "bg-red-50/80 border border-red-200"}`}>
             <div className="font-bold">
               {correct ? "正解" : "不正解"}　正答: {q.answer ? "○" : "×"}
             </div>

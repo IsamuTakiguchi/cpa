@@ -208,7 +208,7 @@ export function SettingsPage() {
               </thead>
               <tbody>
                 {snapshots.map((s) => (
-                  <tr key={s.day} className="border-b border-slate-100">
+                  <tr key={s.day} className="border-b border-slate-900/8">
                     <td className="py-1.5">{s.day}</td>
                     <td>
                       {s.hasUserExport ? (

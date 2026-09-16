@@ -7,13 +7,13 @@ export function DiagramCard({ diagram }: { diagram: Diagram }) {
   return (
     <div className="card break-inside-avoid">
       <div className="flex items-center gap-2 mb-2">
-        <span className="chip bg-indigo-100 text-indigo-800">{KIND_LABEL[diagram.kind]}</span>
+        <span className="chip bg-indigo-100/80 text-indigo-800">{KIND_LABEL[diagram.kind]}</span>
         <h3 className="font-bold">{diagram.title}</h3>
       </div>
       <Mermaid code={diagram.mermaid} title={diagram.title} />
       <p className="text-sm text-slate-600 mt-2 leading-6">{diagram.caption}</p>
       {diagram.keyPoints.length > 0 && (
-        <div className="mt-2 rounded-lg bg-amber-50 border border-amber-200 p-3">
+        <div className="mt-2 rounded-xl bg-amber-50/70 border border-amber-200/80 p-3">
           <div className="text-xs font-semibold text-amber-900 mb-1">この図で押さえること</div>
           <ul className="list-disc pl-5 text-sm space-y-0.5">
             {diagram.keyPoints.map((k, i) => (

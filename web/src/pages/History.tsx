@@ -15,9 +15,9 @@ export function HistoryPage() {
   return (
     <div>
       <PageTitle title="履歴" subtitle={`セッション ${sessions.length} 回・解答 ${attempts.length} 件`} />
-      <div className="flex border-b border-slate-200 mb-4">
+      <div className="tabs mb-4">
         {(["sessions", "essays"] as const).map((t) => (
-          <button key={t} className={`px-4 py-2 text-sm -mb-px border-b-2 ${tab === t ? "border-brand text-brand font-semibold" : "border-transparent text-slate-500"}`} onClick={() => setTab(t)}>
+          <button key={t} className={`tab ${tab === t ? "tab-active" : ""}`} onClick={() => setTab(t)}>
             {t === "sessions" ? "セッション" : `答案（${essays.length}）`}
           </button>
         ))}
@@ -78,7 +78,7 @@ export function HistoryPage() {
                     {q.kind === "mini" ? (
                       <>
                         <div className="text-xs text-slate-500">自分の答案</div>
-                        <p className="whitespace-pre-wrap bg-slate-50 rounded p-2">{(a.answer as { text?: string })?.text || "（無記入）"}</p>
+                        <p className="whitespace-pre-wrap glass-inset rounded-lg p-2">{(a.answer as { text?: string })?.text || "（無記入）"}</p>
                         <div className="text-xs text-slate-500">模範解答</div>
                         <p className="whitespace-pre-wrap">{q.q.modelAnswer}</p>
                       </>
@@ -89,7 +89,7 @@ export function HistoryPage() {
                             {sq.label} {sq.question}
                           </div>
                           <div className="text-xs text-slate-500 mt-1">自分の答案</div>
-                          <p className="whitespace-pre-wrap bg-slate-50 rounded p-2">{(a.answer as { subs?: Record<string, string> })?.subs?.[sq.label] || "（無記入）"}</p>
+                          <p className="whitespace-pre-wrap glass-inset rounded-lg p-2">{(a.answer as { subs?: Record<string, string> })?.subs?.[sq.label] || "（無記入）"}</p>
                           <div className="text-xs text-slate-500 mt-1">模範解答</div>
                           <p className="whitespace-pre-wrap">{sq.modelAnswer}</p>
                         </div>
