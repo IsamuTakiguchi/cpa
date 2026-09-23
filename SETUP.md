@@ -77,7 +77,7 @@ Google の OAuth クライアントを 1 つ作り、その ID とシークレ�
 
 ### 設定を変えたいとき
 
-- **AI モデル**: リポジトリの Settings → Secrets and variables → Actions → **Variables** に `AI_MODEL`（例: `claude-sonnet-5`）を追加して再デプロイ。アプリの設定画面からも切り替えられます。
+- **AI モデル**: リポジトリの Settings → Secrets and variables → Actions → **Variables** に `AI_MODEL`（例: `claude-sonnet-5`）を追加して再デプロイ。未設定なら最新の `claude-opus-5-5` が使われます。アプリの設定画面からも切り替えられます。
 - **招待コードを変えたい**: Railway の web サービス → Variables → `SIGNUP_CODE` を編集。
 - **複数のワークスペースがある**: Variables に `RAILWAY_WORKSPACE`（ワークスペース名または ID）を追加。
 
@@ -116,7 +116,7 @@ web+api サービスの **Variables** タブで以下を追加します。
 | `SESSION_SECRET` | 長いランダム文字列 | 例: ターミナルで `openssl rand -hex 32` を実行した結果 |
 | `SIGNUP_CODE` | 自分だけが知る文字列 | 新規登録に必要な招待コード。第三者の登録を防ぎます |
 | `ANTHROPIC_API_KEY` | `sk-ant-...` | AI 採点・まとめ生成に使用。未設定でも他の機能はすべて動きます |
-| `AI_MODEL` | `claude-opus-5` | AI 採点の既定モデル。コストを抑えたい場合は `claude-sonnet-5` |
+| `AI_MODEL` | `claude-opus-5-5` | AI 採点の既定モデル。最高品質は `claude-fable-5-1`（約 2.5 倍のコスト）、コストを抑えたい場合は `claude-sonnet-5` |
 | `AI_DAILY_LIMIT` | `40` | 1 日あたりの AI 呼び出し上限（コスト暴走防止） |
 | `BACKUP_DIR` | `/data/backups` | サーバー内スナップショットの保存先（次の手順でボリュームを付けます） |
 | `BACKUP_KEEP` | `30` | スナップショットの保持世代数 |

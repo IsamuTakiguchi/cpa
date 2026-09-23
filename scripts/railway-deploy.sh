@@ -13,7 +13,7 @@
 #   RAILWAY_WORKSPACE     ワークスペース名/ID（複数ある場合のみ必要）
 #   RAILWAY_ENVIRONMENT   環境名（既定: production）
 #   ANTHROPIC_API_KEY     設定すると AI 採点が有効になる
-#   AI_MODEL              AI 採点の既定モデル（既定: claude-opus-5）
+#   AI_MODEL              AI 採点の既定モデル（既定: claude-opus-5-5。毎回反映するので GitHub の Variables が正）
 #   SKIP_DEPLOY=1         構築だけ行いデプロイしない
 # =============================================================================
 set -euo pipefail
@@ -94,7 +94,7 @@ ensure_var PORT "$PORT"
 ensure_var COOKIE_SECURE "true"
 ensure_var BACKUP_DIR "$MOUNT_PATH/backups"
 ensure_var BACKUP_KEEP "30"
-ensure_var AI_MODEL "${AI_MODEL:-claude-opus-5}"
+set_var AI_MODEL "${AI_MODEL:-claude-opus-5-5}"; echo "  AI_MODEL: ${AI_MODEL:-claude-opus-5-5} に設定しました"
 ensure_var AI_DAILY_LIMIT "40"
 ensure_var NODE_ENV "production"
 if has_var SESSION_SECRET; then echo "  SESSION_SECRET: 設定済み"; else set_var SESSION_SECRET "$(openssl rand -hex 32)"; echo "  SESSION_SECRET: 生成しました"; fi
@@ -120,7 +120,7 @@ if [[ -n "${ALLOWED_EMAILS:-}" ]]; then set_var ALLOWED_EMAILS "$ALLOWED_EMAILS"
 if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
   set_var ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY"
   echo "  ANTHROPIC_API_KEY: 設定しました（AI 採点 有効）"
-  ai_status="有効（モデル: ${AI_MODEL:-claude-opus-5}）"
+  ai_status="有効（モデル: ${AI_MODEL:-claude-opus-5-5}）"
 elif has_var ANTHROPIC_API_KEY; then
   ai_status="有効（既存のキー）"
 else

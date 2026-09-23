@@ -32,6 +32,24 @@ const SYSTEM = `あなたは公認会計士試験（論文式）の採点官で�
 - 講評は具体的に。答案の表現を引用して指摘し、次に書くべき文を示します。
 - 改善答案は受験生が本試験で書ける長さ（枝問なら200〜400字）に収めます。`;
 
+/** effort（思考量）を指定できるモデルか。Haiku 4.5 は非対応なので付けない */
+export function supportsEffort(model: string): boolean {
+  return !model.startsWith("claude-haiku");
+}
+
+/** 採点は品質重視: Opus 5.5 の既定 effort は medium なので high を明示する */
+function outputConfig(model: string, extra: Record<string, unknown> = {}) {
+  return supportsEffort(model) ? { ...extra, effort: "high" as const } : extra;
+}
+
+/** 安全分類器による拒否（stop_reason: refusal）を日本語のエラーにする */
+function assertNotRefused(response: { stop_reason: string | null; stop_details?: { explanation?: string | null } | null }) {
+  if (response.stop_reason === "refusal") {
+    const why = response.stop_details?.explanation ? `（${response.stop_details.explanation}）` : "";
+    throw new Error(`AI が応答を拒否しました${why}。答案の内容を見直すか、別のモデルをお試しください`);
+  }
+}
+
 export async function gradeEssay(apiKey: string, model: string, input: GradeInput): Promise<AiFeedback> {
   const client = new Anthropic({ apiKey });
   const maxScore = input.points.reduce((s, p) => s + p.score, 0);
@@ -53,13 +71,15 @@ ${input.answerText.trim() === "" ? "（無記入）" : input.answerText}
 
 上記の採点ポイントごとに点数とコメントを付け、総合講評と改善答案を作成してください。`;
 
+  // thinking のトークンも max_tokens に含まれるため余裕を持たせる
   const response = await client.messages.parse({
     model,
-    max_tokens: 8000,
+    max_tokens: 16000,
     system: SYSTEM,
     messages: [{ role: "user", content: user }],
-    output_config: { format: zodOutputFormat(gradeSchema) },
+    output_config: outputConfig(model, { format: zodOutputFormat(gradeSchema) }),
   });
+  assertNotRefused(response);
   const parsed = response.parsed_output;
   if (!parsed) throw new Error("AI の採点結果を解析できませんでした");
   return toFeedback(model, input.points, parsed);
@@ -109,10 +129,12 @@ ${weakText}
 上記をもとに「直前確認ポイント」を作成してください。`;
   const response = await client.messages.create({
     model,
-    max_tokens: 6000,
+    max_tokens: 16000,
     system: SUMMARY_SYSTEM,
     messages: [{ role: "user", content: user }],
+    output_config: outputConfig(model),
   });
+  assertNotRefused(response);
   return response.content
     .filter((b): b is Anthropic.TextBlock => b.type === "text")
     .map((b) => b.text)

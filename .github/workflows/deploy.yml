@@ -25,7 +25,7 @@ jobs:
       ALLOWED_EMAILS: ${{ vars.ALLOWED_EMAILS }}
       RAILWAY_PROJECT_NAME: ${{ vars.RAILWAY_PROJECT_NAME || 'cpa' }}
       RAILWAY_WORKSPACE: ${{ vars.RAILWAY_WORKSPACE }}
-      AI_MODEL: ${{ vars.AI_MODEL || 'claude-opus-5' }}
+      AI_MODEL: ${{ vars.AI_MODEL || 'claude-opus-5-5' }}
     steps:
       - name: Secrets を確認
         run: |

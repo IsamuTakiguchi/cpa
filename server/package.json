@@ -11,7 +11,7 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.124.0",
+    "@anthropic-ai/sdk": "^0.128.0",
     "@cpa/shared": "*",
     "@hono/node-server": "^1.19.0",
     "drizzle-orm": "^0.45.0",

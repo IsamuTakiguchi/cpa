@@ -142,9 +142,11 @@ export function SettingsPage() {
           <label className="label">AI 採点に使うモデル</label>
           <select className="input max-w-xs" value={settings.aiModel} onChange={(e) => setAiModel(e.target.value)}>
             <option value="">サーバー既定{aiModel ? `（${aiModel}）` : ""}</option>
-            <option value="claude-opus-5">claude-opus-5（最高品質）</option>
+            <option value="claude-opus-5-5">claude-opus-5-5（推奨・最新の Opus）</option>
+            <option value="claude-fable-5-1">claude-fable-5-1（最高品質・高コスト）</option>
             <option value="claude-sonnet-5">claude-sonnet-5（高速・低コスト）</option>
             <option value="claude-haiku-4-5">claude-haiku-4-5（最速・最安）</option>
+            <option value="claude-opus-5">claude-opus-5（旧）</option>
           </select>
           <p className="text-xs text-slate-500 mt-1">{user ? (aiEnabled ? "AI 採点は有効です。" : "サーバーに ANTHROPIC_API_KEY が未設定のため AI 採点は無効です。") : "AI 採点はログイン時のみ利用できます。"}</p>
         </div>

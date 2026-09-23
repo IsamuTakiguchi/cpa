@@ -14,7 +14,7 @@ export const env = {
   sessionSecret: req("SESSION_SECRET", isProd ? undefined : "dev-only-session-secret-change-me"),
   signupCode: req("SIGNUP_CODE", isProd ? undefined : "dev"),
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
-  aiModel: process.env.AI_MODEL ?? "claude-opus-5",
+  aiModel: process.env.AI_MODEL ?? "claude-opus-5-5",
   aiDailyLimit: Number(process.env.AI_DAILY_LIMIT ?? 40),
   backupDir: process.env.BACKUP_DIR ?? "./data/backups",
   backupKeep: Number(process.env.BACKUP_KEEP ?? 30),
@@ -34,5 +34,5 @@ export const env = {
   sessionDays: 30,
 };
 
-/** AI 採点に利用を許可するモデル ID */
-export const ALLOWED_AI_MODELS = ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"] as const;
+/** AI 採点に利用を許可するモデル ID（先頭が推奨。claude-opus-5 は保存済み設定との互換のため残す） */
+export const ALLOWED_AI_MODELS = ["claude-opus-5-5", "claude-fable-5-1", "claude-sonnet-5", "claude-haiku-4-5", "claude-opus-5"] as const;

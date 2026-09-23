@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { toFeedback } from "./grader";
+import { supportsEffort, toFeedback } from "./grader";
+
+describe("AI 採点のモデル判定", () => {
+  it("Haiku 以外は effort を指定できる", () => {
+    expect(supportsEffort("claude-opus-5-5")).toBe(true);
+    expect(supportsEffort("claude-fable-5-1")).toBe(true);
+    expect(supportsEffort("claude-sonnet-5")).toBe(true);
+    expect(supportsEffort("claude-haiku-4-5")).toBe(false);
+  });
+});
 
 describe("AI 採点結果の整形", () => {
   const points = [
@@ -8,7 +17,7 @@ describe("AI 採点結果の整形", () => {
     { text: "C", score: 3 },
   ];
   it("配点を超えず、欠けたポイントは0点、0.5点刻みに丸める", () => {
-    const fb = toFeedback("claude-opus-5", points, {
+    const fb = toFeedback("claude-opus-5-5", points, {
       pointResults: [
         { index: 0, score: 9, comment: "over" },
         { index: 1, score: 1.3, comment: "partial" },
