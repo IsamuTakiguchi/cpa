@@ -37,6 +37,7 @@ export function ProceduresPage() {
   return (
     <div className="space-y-4 max-w-3xl">
       <PageTitle title="手続き・スケジュール" subtitle={`2027年（令和9年）論文式試験。公式情報の最終確認日: ${EXAM_INFO_LAST_VERIFIED}`} />
+      <p className="text-xs text-slate-500 -mt-2">本アプリは金融庁・公認会計士・監査審査会とは関係のない非公式の学習アプリです。正式な情報は各「公式ページ」で必ず確認してください。</p>
       <div className="card border-l-4 border-brand">
         <div className="font-bold">{EXAM_AUDIENCE.title} の方向けの案内</div>
         <div className="text-sm mt-1">{EXAM_AUDIENCE.subjects}</div>

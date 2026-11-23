@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "cap:sync": "cap sync ios",
     "cap:open": "cap open ios",
-    "ios:assets": "capacitor-assets generate --ios",
+    "ios:assets": "node scripts/make-icon-assets.cjs && capacitor-assets generate --ios",
     "capacitor:sync:after": "node scripts/ios-apply-config.cjs"
   },
   "dependencies": {

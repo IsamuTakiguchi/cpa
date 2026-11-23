@@ -14,6 +14,7 @@ import { exportTextFile } from "../native/share";
 import { ReminderSettings } from "../components/ReminderSettings";
 import { ProSettings } from "../components/paywall/ProSettings";
 import { usePro } from "../billing/ProProvider";
+import { AboutSection } from "../components/AboutSection";
 
 type Snap = { day: string; createdAt: string; hasDbDump: boolean; dbDumpBytes: number; hasUserExport: boolean; userExportBytes: number };
 
@@ -273,6 +274,8 @@ export function SettingsPage() {
           )}
         </section>
       )}
+
+      <AboutSection />
 
       <section className="card space-y-2">
         <h2 className="font-bold text-red-700">危険な操作</h2>
