@@ -5,6 +5,10 @@ import { saveSettings } from "../db/local";
 import { useSettings } from "../hooks/useData";
 import { allChecklist, allEvents, buildIcs, daysFrom, formatJpDate, googleCalendarUrl } from "../lib/examSchedule";
 import { syncEngine } from "../sync/syncEngine";
+import { Link } from "react-router-dom";
+import { isNative } from "../native/platform";
+import { exportTextFile } from "../native/share";
+import { haptic } from "../native/haptics";
 
 type Tab = "schedule" | "checklist" | "exemption" | "standards";
 
@@ -20,17 +24,12 @@ export function ProceduresPage() {
     const next = { ...checks };
     if (next[id]) delete next[id];
     else next[id] = new Date().toISOString();
+    haptic.tap();
     await saveSettings({ procedureChecks: next });
     syncEngine.schedule();
   };
   const downloadIcs = () => {
-    const blob = new Blob([buildIcs(events)], { type: "text/calendar" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "cpa-exam-2027.ics";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    void exportTextFile("cpa-exam-2027.ics", buildIcs(events), "text/calendar").catch(() => undefined);
   };
 
   const done = checklist.filter((c) => checks[c.id]).length;
@@ -63,7 +62,13 @@ export function ProceduresPage() {
             <button className="btn-secondary text-sm" onClick={downloadIcs}>
               すべてカレンダーに追加（.ics）
             </button>
-            <span className="text-xs text-slate-500 self-center">iPhone/Android のカレンダーや Google カレンダーに取り込めます。期限と試験日には1週間前・前日の通知が付きます。</span>
+            {isNative() ? (
+              <span className="text-xs text-slate-500 self-center">
+                共有画面の「“ファイル”に保存」で保存し、ファイル App から開くとカレンダーに追加できます。アプリから直接お知らせを受け取るには <Link to="/settings" className="underline">設定 → 通知</Link> をオンにしてください。
+              </span>
+            ) : (
+              <span className="text-xs text-slate-500 self-center">iPhone/Android のカレンダーや Google カレンダーに取り込めます。期限と試験日には1週間前・前日の通知が付きます。</span>
+            )}
           </div>
           <Alert kind="info">「予定・未確定」の日付は令和8年試験の運用からの見込みです。2027年1月に公表される第Ⅱ回受験案内で確定し、この画面も更新されます。</Alert>
           {events.map((e) => {

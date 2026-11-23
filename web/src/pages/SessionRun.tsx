@@ -9,6 +9,7 @@ import { db } from "../db/local";
 import { useSession, useSettings } from "../hooks/useData";
 import { abandonSession, computeResult, reviewCard, saveAttempt, updateSession } from "../lib/repo";
 import type { Rating } from "../lib/srs";
+import { haptic } from "../native/haptics";
 
 export function SessionRunPage() {
   const { sessionId = "" } = useParams();
@@ -71,6 +72,7 @@ export function SessionRunPage() {
     const attempts = await db.attempts.where("sessionId").equals(s.id).toArray();
     const result = computeResult({ ...s, perQuestionSec: s.perQuestionSec ?? {} }, attempts);
     await updateSession(s, { status: "completed", endedAt: new Date().toISOString(), elapsedSec: Math.round(currentElapsed()), result, currentIndex: total });
+    haptic.success();
     navigate(`/session/${s.id}/result`, { replace: true });
   };
 
@@ -92,7 +94,7 @@ export function SessionRunPage() {
   };
 
   const header = (
-    <div className="sticky top-[52px] md:top-0 z-20 -mx-4 md:-mx-8 px-4 md:px-8 py-2 glass rounded-none border-x-0 border-t-0 no-print">
+    <div className="sticky top-[calc(52px+env(safe-area-inset-top))] md:top-[env(safe-area-inset-top)] z-20 -mx-4 md:-mx-8 px-4 md:px-8 py-2 glass rounded-none border-x-0 border-t-0 no-print">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="text-sm font-semibold truncate">{session.config.title}</div>

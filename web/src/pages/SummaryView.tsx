@@ -10,7 +10,8 @@ import { useAttempts, useSettings, useTopicProgress } from "../hooks/useData";
 import { saveSummary } from "../lib/repo";
 import { missedPoints, weakItems } from "../lib/stats";
 import { buildSummaryMarkdown, topicsInScope } from "../lib/summaryBuilder";
-import { serverFeaturesEnabled } from "../native/platform";
+import { isNative, serverFeaturesEnabled } from "../native/platform";
+import { printPage, shareText } from "../native/share";
 
 export function SummaryViewPage() {
   const { summaryId = "" } = useParams();
@@ -39,10 +40,10 @@ export function SummaryViewPage() {
   const copy = async () => {
     const text = (summary.aiNotes ? `# AI 直前確認ポイント\n\n${summary.aiNotes}\n\n---\n\n` : "") + summary.bodyMarkdown;
     try {
-      await navigator.clipboard.writeText(text);
-      setMsg({ kind: "success", text: "Markdown をコピーしました。" });
+      const r = await shareText(summary.title, text);
+      if (r === "copied") setMsg({ kind: "success", text: "Markdown をコピーしました。" });
     } catch {
-      setMsg({ kind: "error", text: "コピーに失敗しました。" });
+      setMsg({ kind: "error", text: isNative() ? "共有できませんでした。" : "コピーに失敗しました。" });
     }
   };
 
@@ -80,11 +81,16 @@ export function SummaryViewPage() {
           </div>
         )}
         <div className="flex flex-wrap gap-2 mb-4">
-          <button className="btn-primary" onClick={() => window.print()}>
+          <button
+            className="btn-primary"
+            onClick={() => {
+              printPage(summary.title).catch((e) => setMsg({ kind: "error", text: `印刷を開けませんでした: ${(e as Error).message}` }));
+            }}
+          >
             印刷 / PDF 保存
           </button>
           <button className="btn-secondary" onClick={copy}>
-            Markdown をコピー
+            {isNative() ? "共有" : "Markdown をコピー"}
           </button>
           <button className="btn-secondary" onClick={() => setEditing(!editing)}>
             {editing ? "編集をやめる" : "編集（メモ追記）"}

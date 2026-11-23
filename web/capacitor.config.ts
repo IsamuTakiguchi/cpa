@@ -38,6 +38,8 @@ const config: CapacitorConfig = {
     },
     LocalNotifications: {
       iconColor: appConfig.theme.brand,
+      // アプリを開いている最中に届いた通知もバナーで表示する
+      presentationOptions: ["banner", "sound", "list"],
     },
   },
 };

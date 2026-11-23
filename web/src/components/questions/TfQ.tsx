@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TrueFalseQuestion } from "@cpa/shared";
 import type { QuestionProps } from "./types";
+import { haptic } from "../../native/haptics";
 
 export function TfQ({ q, onDone }: QuestionProps<TrueFalseQuestion>) {
   const [choice, setChoice] = useState<boolean | null>(null);
@@ -14,10 +15,10 @@ export function TfQ({ q, onDone }: QuestionProps<TrueFalseQuestion>) {
       </div>
       {choice === null ? (
         <div className="grid grid-cols-2 gap-3 mt-4">
-          <button className="btn bg-emerald-600 text-white text-2xl py-4" onClick={() => setChoice(true)}>
+          <button className="btn bg-emerald-600 text-white text-2xl py-4" onClick={() => { setChoice(true); haptic.result(q.answer === true); }}>
             ○
           </button>
-          <button className="btn bg-rose-600 text-white text-2xl py-4" onClick={() => setChoice(false)}>
+          <button className="btn bg-rose-600 text-white text-2xl py-4" onClick={() => { setChoice(false); haptic.result(q.answer === false); }}>
             ×
           </button>
         </div>

@@ -3,6 +3,7 @@ import type { Card, CardState } from "@cpa/shared";
 import { db } from "../../db/local";
 import { previewIntervals, RATING_LABELS, type Rating } from "../../lib/srs";
 import type { QuestionProps } from "./types";
+import { haptic } from "../../native/haptics";
 
 export function CardQ({ q, onDone }: QuestionProps<Card>) {
   const [flipped, setFlipped] = useState(false);
@@ -27,7 +28,7 @@ export function CardQ({ q, onDone }: QuestionProps<Card>) {
             <button
               key={r}
               className={`btn flex-col py-2 backdrop-blur-sm ring-1 ring-white/70 shadow-[0_4px_14px_-6px_rgba(30,58,95,.35)] ${r === 0 ? "bg-red-100/80 text-red-800 hover:bg-red-100" : r === 1 ? "bg-amber-100/80 text-amber-800 hover:bg-amber-100" : r === 2 ? "bg-emerald-100/80 text-emerald-800 hover:bg-emerald-100" : "bg-sky-100/80 text-sky-800 hover:bg-sky-100"}`}
-              onClick={() => onDone({ answer: { rating: r }, isCorrect: r >= 2, selfScore: null, selfChecks: null, maxScore: null, aiFeedback: null })}
+              onClick={() => { haptic.tap(); onDone({ answer: { rating: r }, isCorrect: r >= 2, selfScore: null, selfChecks: null, maxScore: null, aiFeedback: null }); }}
             >
               <span className="font-semibold">{RATING_LABELS[r]}</span>
               {intervals && <span className="text-[10px] opacity-70">{intervals[r]}</span>}

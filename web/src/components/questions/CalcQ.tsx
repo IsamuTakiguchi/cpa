@@ -3,6 +3,7 @@ import type { CalcQuestion } from "@cpa/shared";
 import { checkCalc, formatNumber } from "../../lib/grading";
 import { Markdown } from "../Markdown";
 import type { QuestionProps } from "./types";
+import { haptic } from "../../native/haptics";
 
 export function CalcQ({ q, phase = "full", initialAnswer, onDraft, onDone }: QuestionProps<CalcQuestion>) {
   const init = () => ((initialAnswer as { values?: string[] })?.values ?? q.answers.map(() => "")).slice();
@@ -35,7 +36,16 @@ export function CalcQ({ q, phase = "full", initialAnswer, onDraft, onDone }: Que
         ))}
       </div>
       {phase === "answer" ? null : !submitted ? (
-        <button className="btn-primary w-full mt-4" onClick={() => setSubmitted(true)}>
+        <button
+          className="btn-primary w-full mt-4"
+          onClick={() => {
+            setSubmitted(true);
+            const n = result.perAnswer.filter(Boolean).length;
+            if (result.allCorrect) haptic.success();
+            else if (n > 0) haptic.warning();
+            else haptic.error();
+          }}
+        >
           採点する
         </button>
       ) : (

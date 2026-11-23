@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ShortAnswerQuestion } from "@cpa/shared";
 import { checkShortAnswer } from "../../lib/grading";
 import type { QuestionProps } from "./types";
+import { haptic } from "../../native/haptics";
 
 export function ShortQ({ q, onDone }: QuestionProps<ShortAnswerQuestion>) {
   const [text, setText] = useState("");
@@ -26,6 +27,7 @@ export function ShortQ({ q, onDone }: QuestionProps<ShortAnswerQuestion>) {
           onSubmit={(e) => {
             e.preventDefault();
             setSubmitted(true);
+            haptic.result(checkShortAnswer(text, q.acceptedKeywords));
           }}
         >
           <input className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="答えを入力" autoFocus autoComplete="off" />

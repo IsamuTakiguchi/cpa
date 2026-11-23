@@ -2,14 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { ExportFile } from "@cpa/shared";
 import { api } from "../api/client";
-import { Alert, Modal, PageTitle } from "../components/ui";
+import { Alert, MenuList, Modal, PageTitle } from "../components/ui";
 import { useAuth } from "../hooks/useAuth";
 import { useAttempts, useSettings } from "../hooks/useData";
 import { useSync } from "../hooks/useSync";
 import { buildLocalExport, clearLocalData, importLocal, setAiModel, setExamDate } from "../lib/repo";
 import { saveSettings } from "../db/local";
 import { syncEngine } from "../sync/syncEngine";
-import { serverFeaturesEnabled } from "../native/platform";
+import { isNative, serverFeaturesEnabled } from "../native/platform";
+import { exportTextFile } from "../native/share";
+import { ReminderSettings } from "../components/ReminderSettings";
 
 type Snap = { day: string; createdAt: string; hasDbDump: boolean; dbDumpBytes: number; hasUserExport: boolean; userExportBytes: number };
 
@@ -42,14 +44,13 @@ export function SettingsPage() {
 
   const doExport = async () => {
     const file = await buildLocalExport();
-    const blob = new Blob([JSON.stringify(file, null, 1)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `cpa-backup-${file.exportedAt.slice(0, 10)}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-    setMsg({ kind: "success", text: `${Object.values(file.data).reduce((s, arr) => s + arr.length, 0)} 件を書き出しました。` });
+    try {
+      const outcome = await exportTextFile(`cpa-backup-${file.exportedAt.slice(0, 10)}.json`, JSON.stringify(file, null, 1), "application/json");
+      if (outcome === "cancelled") return;
+      setMsg({ kind: "success", text: `${Object.values(file.data).reduce((s, arr) => s + arr.length, 0)} 件を書き出しました。` });
+    } catch (e) {
+      setMsg({ kind: "error", text: `書き出しに失敗しました: ${(e as Error).message}` });
+    }
   };
 
   const onFile = async (f: File | undefined) => {
@@ -98,6 +99,16 @@ export function SettingsPage() {
     <div className="space-y-5 max-w-2xl">
       <PageTitle title="設定" />
       {msg && <Alert kind={msg.kind}>{msg.text}</Alert>}
+
+      {/* スマホではタブにないページへの入口 */}
+      <MenuList
+        className="md:hidden"
+        items={[
+          { to: "/summaries", icon: "📝", label: "まとめノート" },
+          { to: "/history", icon: "📈", label: "学習履歴" },
+          { to: "/procedures", icon: "📅", label: "手続き・適用基準" },
+        ]}
+      />
 
       {showServer && (
       <section className="card space-y-3">
@@ -158,10 +169,12 @@ export function SettingsPage() {
         )}
       </section>
 
+      {isNative() && <ReminderSettings />}
+
       <section className="card space-y-3">
         <h2 className="font-bold">バックアップ（この端末の全データ）</h2>
         <p className="text-sm text-slate-600">
-          解答履歴・カードの復習状態・メモ・まとめノートをすべて 1 つの JSON ファイルに書き出します。現在 {attempts.length} 件の解答があります。
+          解答履歴・カードの復習状態・メモ・まとめノートをすべて 1 つの JSON ファイルに書き出します。{isNative() && "共有画面の「“ファイル”に保存」で iCloud Drive などに保存できます。アプリを削除するとデータも消えるため、定期的に書き出してください。"}現在 {attempts.length} 件の解答があります。
           {settings.lastExportAt && <span> 最終書き出し: {new Date(settings.lastExportAt).toLocaleString("ja-JP")}</span>}
         </p>
         <div className="flex flex-wrap gap-2">

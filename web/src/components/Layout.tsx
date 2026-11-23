@@ -1,7 +1,9 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useSync } from "../hooks/useSync";
-import { serverFeaturesEnabled } from "../native/platform";
+import { isNative, serverFeaturesEnabled } from "../native/platform";
+import { haptic } from "../native/haptics";
+import { NativeEffects } from "./NativeEffects";
 
 const NAV = [
   { to: "/", label: "ホーム", icon: "🏠" },
@@ -21,8 +23,18 @@ export function Layout() {
   const sync = useSync();
   const { pathname } = useLocation();
   const showAccount = serverFeaturesEnabled();
+  const navigate = useNavigate();
+  // ネイティブ: タブの最上位以外の画面ではヘッダーに「戻る」を出す（左端スワイプでも戻れる）
+  const showBack = isNative() && !MOBILE_NAV.some((n) => n.to === pathname);
+  const goBack = () => {
+    haptic.tap();
+    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+    if (idx > 0) navigate(-1);
+    else navigate("/", { replace: true });
+  };
   return (
     <div className="min-h-screen md:flex">
+      <NativeEffects />
       <div className="glass-bg no-print" aria-hidden>
         <span />
         <span />
@@ -70,7 +82,17 @@ export function Layout() {
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="md:hidden sticky top-0 z-30 glass rounded-none border-x-0 border-t-0 px-4 py-3 safe-header flex items-center justify-between no-print">
-          <div className="font-bold text-gradient">CPA 論文式</div>
+          <div className="flex items-center gap-1 min-w-0">
+            {showBack && (
+              <button type="button" onClick={goBack} className="-ml-2 px-2 py-0.5 text-brand text-base font-medium flex items-center" aria-label="戻る">
+                <span className="text-2xl leading-none -mt-0.5 mr-0.5" aria-hidden>
+                  ‹
+                </span>
+                戻る
+              </button>
+            )}
+            <div className={`font-bold text-gradient ${showBack ? "text-sm" : ""}`}>CPA 論文式</div>
+          </div>
           <div className="text-xs text-slate-600 flex items-center gap-2">
             {!showAccount ? null : user ? (
               <SyncBadge />
@@ -92,6 +114,7 @@ export function Layout() {
               key={n.to}
               to={n.to}
               end={n.to === "/"}
+              onClick={() => haptic.selection()}
               className={({ isActive }) =>
                 `relative flex flex-col items-center gap-0.5 py-2 px-2 text-[11px] min-w-[56px] transition-all duration-200 ${
                   isActive ? "text-brand font-semibold -translate-y-0.5" : "text-slate-500"

@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { getSubject, KIND_LABELS, type QuestionKind, type SubjectId } from "@cpa/shared";
 
 export function SubjectChip({ subject, small = false }: { subject: SubjectId | string; small?: boolean }) {
@@ -104,4 +105,56 @@ export function formatDate(iso: string): string {
 
 export function pct(v: number | null | undefined): string {
   return v === null || v === undefined ? "—" : `${Math.round(v * 100)}%`;
+}
+
+/** 読み込み中のくるくる */
+export function Spinner({ label, className = "" }: { label?: string; className?: string }) {
+  return (
+    <div className={`flex items-center justify-center gap-2 text-sm text-slate-500 ${className}`} role="status" aria-live="polite">
+      <span className="inline-block h-5 w-5 rounded-full border-2 border-slate-300 border-t-brand animate-spin" aria-hidden />
+      {label && <span>{label}</span>}
+    </div>
+  );
+}
+
+export interface MenuItem {
+  to?: string;
+  onClick?: () => void;
+  icon?: string;
+  label: string;
+  detail?: ReactNode;
+}
+
+/** iOS の設定画面のような縦並びのメニュー */
+export function MenuList({ items, className = "" }: { items: MenuItem[]; className?: string }) {
+  return (
+    <nav className={`card p-0 overflow-hidden divide-y divide-slate-900/8 ${className}`}>
+      {items.map((it) => {
+        const inner = (
+          <>
+            {it.icon && (
+              <span className="w-6 text-center" aria-hidden>
+                {it.icon}
+              </span>
+            )}
+            <span className="flex-1 min-w-0 text-left">{it.label}</span>
+            {it.detail && <span className="text-xs text-slate-500 shrink-0">{it.detail}</span>}
+            <span className="text-slate-400 text-lg leading-none" aria-hidden>
+              ›
+            </span>
+          </>
+        );
+        const cls = "flex items-center gap-3 px-4 py-3 text-sm w-full active:bg-slate-900/5";
+        return it.to ? (
+          <Link key={it.label} to={it.to} className={cls}>
+            {inner}
+          </Link>
+        ) : (
+          <button key={it.label} type="button" onClick={it.onClick} className={cls}>
+            {inner}
+          </button>
+        );
+      })}
+    </nav>
+  );
 }

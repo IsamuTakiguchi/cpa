@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Modal } from "./ui";
+import { Modal, Spinner } from "./ui";
 
 type MermaidApi = typeof import("mermaid").default;
 let mermaidPromise: Promise<MermaidApi> | null = null;
@@ -114,7 +114,7 @@ export function Mermaid({ code, onRendered, className = "", zoomable = true, tit
   }
   return (
     <div className={`relative ${className}`}>
-      {!svg && <div className="h-24 flex items-center justify-center text-xs text-slate-400">図を読み込み中…</div>}
+      {!svg && <Spinner label="図を読み込み中…" className="h-24 text-xs" />}
       <div ref={ref} className="mermaid overflow-x-auto rounded-xl bg-white/80 p-2" dangerouslySetInnerHTML={{ __html: svg }} />
       {zoomable && svg && (
         <button className="absolute top-2 right-2 btn-secondary text-xs py-1 px-2.5 no-print" onClick={() => setZoom(true)} aria-label="拡大表示">
