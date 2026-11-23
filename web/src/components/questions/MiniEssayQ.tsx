@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { AiFeedback, MiniEssayQuestion } from "@cpa/shared";
 import { maxScore, selfScore } from "../../lib/grading";
 import { AiGradePanel } from "./AiGradePanel";
+import { serverFeaturesEnabled } from "../../native/platform";
 import { GradingChecklist } from "./GradingChecklist";
 import type { QuestionProps } from "./types";
 
@@ -46,7 +47,7 @@ export function MiniEssayQ({ q, phase = "full", initialAnswer, onDraft, onDone, 
           </div>
           <div className="card">
             <GradingChecklist points={q.points} checked={checks} onChange={setChecks} />
-            <AiGradePanel questionId={q.id} answerText={text} feedback={ai} onGraded={setAi} model={aiModel} />
+            {serverFeaturesEnabled() && <AiGradePanel questionId={q.id} answerText={text} feedback={ai} onGraded={setAi} model={aiModel} />}
           </div>
           <button className="btn-primary w-full" onClick={() => onDone({ answer: { text }, isCorrect: selfScore(q.points, checks) >= max * 0.7, selfScore: selfScore(q.points, checks), selfChecks: checks, maxScore: max, aiFeedback: ai })}>
             次へ（自己採点 {selfScore(q.points, checks)} / {max} 点）

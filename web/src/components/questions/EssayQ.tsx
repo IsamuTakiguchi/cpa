@@ -3,6 +3,7 @@ import type { AiFeedback, EssayQuestion } from "@cpa/shared";
 import { essayMaxScore } from "@cpa/shared";
 import { Markdown } from "../Markdown";
 import { AiGradePanel } from "./AiGradePanel";
+import { serverFeaturesEnabled } from "../../native/platform";
 import { GradingChecklist } from "./GradingChecklist";
 import type { QuestionProps } from "./types";
 
@@ -60,7 +61,7 @@ export function EssayQ({ q, phase = "full", initialAnswer, onDraft, onDone, aiMo
               </div>
               <div className="card">
                 <GradingChecklist points={sq.points} checked={checks[sq.label] ?? []} onChange={(next) => setChecks({ ...checks, [sq.label]: next })} />
-                <AiGradePanel questionId={q.id} subLabel={sq.label} answerText={subs[sq.label] ?? ""} feedback={ai[sq.label] ?? null} onGraded={(f) => setAi({ ...ai, [sq.label]: f })} model={aiModel} />
+                {serverFeaturesEnabled() && <AiGradePanel questionId={q.id} subLabel={sq.label} answerText={subs[sq.label] ?? ""} feedback={ai[sq.label] ?? null} onGraded={(f) => setAi({ ...ai, [sq.label]: f })} model={aiModel} />}
               </div>
               {i < q.subQuestions.length - 1 && (
                 <button className="btn-secondary w-full" onClick={() => setActive(i + 1)}>

@@ -67,7 +67,7 @@ export function Modal({ open, onClose, title, children, footer }: { open: boolea
   // backdrop-filter を持つ祖先（ガラスのカード）は fixed の基準になるため、body 直下に描画する
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/30 backdrop-blur-sm p-0 sm:p-4 no-print animate-fade-in" onClick={onClose}>
-      <div className="w-full sm:max-w-lg md:max-w-4xl glass-strong rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col animate-sheet-up sm:animate-pop" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+      <div className="w-full sm:max-w-lg md:max-w-4xl glass-strong rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col animate-sheet-up sm:animate-pop pb-[env(safe-area-inset-bottom)] sm:pb-0" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="sm:hidden mx-auto mt-2 h-1 w-10 rounded-full bg-slate-900/15" aria-hidden />
         <div className="px-5 pt-3 sm:pt-4 pb-2 font-bold text-lg border-b border-slate-900/10">{title}</div>
         <div className="px-5 py-4 overflow-y-auto text-sm">{children}</div>

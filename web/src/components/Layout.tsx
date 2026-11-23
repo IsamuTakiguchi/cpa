@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useSync } from "../hooks/useSync";
+import { serverFeaturesEnabled } from "../native/platform";
 
 const NAV = [
   { to: "/", label: "ホーム", icon: "🏠" },
@@ -19,6 +20,7 @@ export function Layout() {
   const { user } = useAuth();
   const sync = useSync();
   const { pathname } = useLocation();
+  const showAccount = serverFeaturesEnabled();
   return (
     <div className="min-h-screen md:flex">
       <div className="glass-bg no-print" aria-hidden>
@@ -27,7 +29,7 @@ export function Layout() {
         <span />
       </div>
       <aside className="hidden md:flex md:flex-col w-60 shrink-0 sticky top-0 h-screen glass border-y-0 border-l-0 rounded-none no-print">
-        <div className="px-5 py-5 border-b border-slate-900/10">
+        <div className="px-5 py-5 border-b border-slate-900/10 safe-pt">
           <div className="text-lg font-bold leading-tight text-gradient">CPA 論文式</div>
           <div className="text-xs text-slate-500">2027年 会計学・監査論・租税法</div>
         </div>
@@ -50,8 +52,10 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-5 py-3 text-xs text-slate-500 border-t border-slate-900/10">
-          {user ? (
+        <div className="px-5 py-3 text-xs text-slate-500 border-t border-slate-900/10 safe-pb">
+          {!showAccount ? (
+            <div>学習データはこの端末に保存されます</div>
+          ) : user ? (
             <>
               <div className="truncate">{user.email}</div>
               <SyncBadge />
@@ -61,14 +65,14 @@ export function Layout() {
               ログイン / 登録
             </NavLink>
           )}
-          {!user && <div className="mt-1">ゲストモード（この端末に保存）</div>}
+          {showAccount && !user && <div className="mt-1">ゲストモード（この端末に保存）</div>}
         </div>
       </aside>
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="md:hidden sticky top-0 z-30 glass rounded-none border-x-0 border-t-0 px-4 py-3 flex items-center justify-between no-print">
+        <header className="md:hidden sticky top-0 z-30 glass rounded-none border-x-0 border-t-0 px-4 py-3 safe-header flex items-center justify-between no-print">
           <div className="font-bold text-gradient">CPA 論文式</div>
           <div className="text-xs text-slate-600 flex items-center gap-2">
-            {user ? (
+            {!showAccount ? null : user ? (
               <SyncBadge />
             ) : (
               <NavLink to="/auth" className="chip bg-white/70 text-slate-700">
@@ -77,12 +81,12 @@ export function Layout() {
             )}
           </div>
         </header>
-        <main className="flex-1 px-4 py-4 md:px-8 md:py-6 max-w-5xl w-full mx-auto pb-28 md:pb-8 print-area">
+        <main className="flex-1 px-4 py-4 md:px-8 md:py-6 safe-main max-w-5xl w-full mx-auto pb-28 md:pb-8 print-area">
           <div key={pathname} className="page-enter">
             <Outlet />
           </div>
         </main>
-        <nav className="md:hidden fixed bottom-3 inset-x-3 z-30 glass rounded-2xl flex justify-around no-print" style={{ marginBottom: "env(safe-area-inset-bottom)" }}>
+        <nav className="mobile-tabbar md:hidden fixed bottom-3 inset-x-3 z-30 glass rounded-2xl flex justify-around no-print" style={{ marginBottom: "env(safe-area-inset-bottom)" }}>
           {MOBILE_NAV.map((n) => (
             <NavLink
               key={n.to}

@@ -9,6 +9,7 @@ import { useSync } from "../hooks/useSync";
 import { buildLocalExport, clearLocalData, importLocal, setAiModel, setExamDate } from "../lib/repo";
 import { saveSettings } from "../db/local";
 import { syncEngine } from "../sync/syncEngine";
+import { serverFeaturesEnabled } from "../native/platform";
 
 type Snap = { day: string; createdAt: string; hasDbDump: boolean; dbDumpBytes: number; hasUserExport: boolean; userExportBytes: number };
 
@@ -24,6 +25,7 @@ export function SettingsPage() {
   const [restoreDay, setRestoreDay] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const showServer = serverFeaturesEnabled();
 
   const loadSnapshots = async () => {
     try {
@@ -97,6 +99,7 @@ export function SettingsPage() {
       <PageTitle title="設定" />
       {msg && <Alert kind={msg.kind}>{msg.text}</Alert>}
 
+      {showServer && (
       <section className="card space-y-3">
         <h2 className="font-bold">アカウントと同期</h2>
         {user ? (
@@ -127,6 +130,7 @@ export function SettingsPage() {
           </div>
         )}
       </section>
+      )}
 
       <section className="card space-y-3">
         <h2 className="font-bold">学習設定</h2>
@@ -138,6 +142,7 @@ export function SettingsPage() {
           <label className="label">1日の学習目標（分）</label>
           <input className="input max-w-xs" type="number" min={10} step={10} value={settings.dailyGoalMinutes} onChange={(e) => saveSettings({ dailyGoalMinutes: Number(e.target.value) || 60 })} />
         </div>
+        {showServer && (
         <div>
           <label className="label">AI 採点に使うモデル</label>
           <select className="input max-w-xs" value={settings.aiModel} onChange={(e) => setAiModel(e.target.value)}>
@@ -150,6 +155,7 @@ export function SettingsPage() {
           </select>
           <p className="text-xs text-slate-500 mt-1">{user ? (aiEnabled ? "AI 採点は有効です。" : "サーバーに ANTHROPIC_API_KEY が未設定のため AI 採点は無効です。") : "AI 採点はログイン時のみ利用できます。"}</p>
         </div>
+        )}
       </section>
 
       <section className="card space-y-3">
@@ -254,7 +260,7 @@ export function SettingsPage() {
         <button className="btn-danger text-sm" onClick={() => setConfirmClear(true)}>
           この端末のデータをすべて削除
         </button>
-        <p className="text-xs text-slate-500">サーバー上のデータは削除されません。ログイン中は次回同期で復元されます。</p>
+        <p className="text-xs text-slate-500">{showServer ? "サーバー上のデータは削除されません。ログイン中は次回同期で復元されます。" : "削除したデータは元に戻せません。"}</p>
       </section>
 
       <Modal

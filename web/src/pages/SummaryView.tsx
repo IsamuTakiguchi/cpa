@@ -10,6 +10,7 @@ import { useAttempts, useSettings, useTopicProgress } from "../hooks/useData";
 import { saveSummary } from "../lib/repo";
 import { missedPoints, weakItems } from "../lib/stats";
 import { buildSummaryMarkdown, topicsInScope } from "../lib/summaryBuilder";
+import { serverFeaturesEnabled } from "../native/platform";
 
 export function SummaryViewPage() {
   const { summaryId = "" } = useParams();
@@ -91,9 +92,9 @@ export function SummaryViewPage() {
           <button className="btn-secondary" onClick={regenerate}>
             最新履歴で再生成
           </button>
-          <button className="btn-secondary bg-indigo-50 border-indigo-200 text-indigo-900" onClick={generateAi} disabled={busy || !user || !aiEnabled} title={!user ? "ログインが必要" : !aiEnabled ? "API キー未設定" : ""}>
+          {serverFeaturesEnabled() && <button className="btn-secondary bg-indigo-50 border-indigo-200 text-indigo-900" onClick={generateAi} disabled={busy || !user || !aiEnabled} title={!user ? "ログインが必要" : !aiEnabled ? "API キー未設定" : ""}>
             {busy ? "AI 生成中…" : summary.aiNotes ? "AI 直前ポイントを再生成" : "AI に直前確認ポイントを作らせる"}
-          </button>
+          </button>}
         </div>
       </div>
       {editing ? (

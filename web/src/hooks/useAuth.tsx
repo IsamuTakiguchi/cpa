@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, ApiError, type MeResponse } from "../api/client";
 import { syncEngine } from "../sync/syncEngine";
+import { serverFeaturesEnabled } from "../native/platform";
 
 interface AuthState {
   /** null = 未ログイン / undefined = 確認中 */
@@ -26,6 +27,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [serverUnavailable, setServerUnavailable] = useState(false);
 
   const refresh = useCallback(async () => {
+    // ネイティブアプリでログイン機能が off のときはサーバーに問い合わせない（端末内だけで動く）
+    if (!serverFeaturesEnabled()) {
+      setUser(null);
+      setServerUnavailable(false);
+      return;
+    }
     try {
       const me = await api.me();
       // Google ログインから戻ってきた直後: この端末のゲストデータをアカウントに取り込む

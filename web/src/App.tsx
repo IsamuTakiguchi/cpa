@@ -15,6 +15,7 @@ import { HistoryPage } from "./pages/History";
 import { SettingsPage } from "./pages/Settings";
 import { AuthPage } from "./pages/Auth";
 import { ProceduresPage } from "./pages/Procedures";
+import { serverFeaturesEnabled } from "./native/platform";
 
 export default function App() {
   return (
@@ -35,7 +36,7 @@ export default function App() {
             <Route path="summaries/:summaryId" element={<SummaryViewPage />} />
             <Route path="history" element={<HistoryPage />} />
             <Route path="settings" element={<SettingsPage />} />
-            <Route path="auth" element={<AuthPage />} />
+            <Route path="auth" element={serverFeaturesEnabled() ? <AuthPage /> : <Navigate to="/settings" replace />} />
             <Route path="procedures" element={<ProceduresPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

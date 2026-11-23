@@ -76,6 +76,60 @@ input {
   font-size: 16px; /* iOS のズーム防止 */
 }
 
+/* ---------- セーフエリア（ノッチ・ステータスバー・ホームバー） ----------
+   ブラウザ／PWA では env() が 0 になるので見た目は変わらない */
+.safe-header {
+  padding-top: calc(0.75rem + env(safe-area-inset-top));
+}
+.safe-pt {
+  padding-top: calc(1.25rem + env(safe-area-inset-top));
+}
+.safe-pb {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .safe-main {
+    padding-top: calc(1.5rem + env(safe-area-inset-top));
+  }
+}
+
+/* ---------- ネイティブアプリ（Capacitor）だけの操作感 ---------- */
+html.native {
+  -webkit-tap-highlight-color: transparent;
+  /* 画面全体の長押しメニュー（リンクのプレビュー等）を出さない。本文の選択は下で許可 */
+  -webkit-touch-callout: none;
+}
+html.native body {
+  overscroll-behavior-y: none;
+}
+html.native button,
+html.native a,
+html.native nav,
+html.native .tab,
+html.native .chip {
+  -webkit-user-select: none;
+  user-select: none;
+}
+html.native textarea,
+html.native input,
+html.native article {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+/* タップしたときの押し込み（ネイティブのボタンのような反応） */
+html.native button:not(:disabled):active,
+html.native a.card:active,
+html.native button.card:active,
+html.native .tab:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease-out;
+}
+/* キーボード表示中は下のタブバーを隠す */
+html.kb-open .mobile-tabbar {
+  display: none;
+}
+
 /* ---------- 背景: グラデーション + 動く光のにじみ ---------- */
 .glass-bg {
   position: fixed;

@@ -9,6 +9,7 @@ import { daysUntil, dueCardCount, studyMinutesByDay, subjectStats } from "../lib
 import { Alert, formatDate, Modal, pct, ProgressBar, SubjectChip } from "../components/ui";
 import { abandonSession } from "../lib/repo";
 import { formatJpDate, pendingChecklist, upcomingEvents } from "../lib/examSchedule";
+import { serverFeaturesEnabled } from "../native/platform";
 
 export function HomePage() {
   const settings = useSettings();
@@ -95,7 +96,7 @@ export function HomePage() {
           </ul>
         </section>
       )}
-      {!user && (
+      {serverFeaturesEnabled() && !user && (
         <Alert kind="info">
           ゲストモードです。データはこの端末に保存されます。PC とスマホで同期するには <Link to="/auth" className="underline font-medium">ログイン</Link> してください。
         </Alert>
