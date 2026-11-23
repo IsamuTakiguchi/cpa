@@ -25,11 +25,21 @@ PC とスマホのブラウザで動き（PWA としてホーム画面に追加�
 `main` に push すると GitHub Actions がプロジェクト作成・Postgres・環境変数・ボリューム・ドメイン発行・デプロイまで自動で行います。
 詳細は [SETUP.md](./SETUP.md) を参照してください。
 
+## iOS アプリ
+
+`web/` を Capacitor で包んだ iOS アプリ（App Store 向け）を同じリポジトリで管理しています。Web 版の挙動は変わりません。
+ビルド手順・申請チェックリスト・掲載文の下書きは [docs/ios-release.md](./docs/ios-release.md) を参照してください。
+
+```bash
+npm run ios:sync   # Web をビルドして iOS プロジェクトへ反映
+npm run ios:open   # Xcode を開く
+```
+
 ## 構成
 
 ```
 shared/   教材コンテンツと共有型（TypeScript）。論点 1 つ = 1 ファイル
-web/      フロント（Vite + React + Tailwind + Dexie/IndexedDB + PWA）
+web/      フロント（Vite + React + Tailwind + Dexie/IndexedDB + PWA）。web/ios に iOS アプリ（Capacitor）
 server/   API（Hono + Drizzle ORM + Postgres）。web/dist も配信
 ```
 
