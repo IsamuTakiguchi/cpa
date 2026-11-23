@@ -12,6 +12,8 @@ import { syncEngine } from "../sync/syncEngine";
 import { isNative, serverFeaturesEnabled } from "../native/platform";
 import { exportTextFile } from "../native/share";
 import { ReminderSettings } from "../components/ReminderSettings";
+import { ProSettings } from "../components/paywall/ProSettings";
+import { usePro } from "../billing/ProProvider";
 
 type Snap = { day: string; createdAt: string; hasDbDump: boolean; dbDumpBytes: number; hasUserExport: boolean; userExportBytes: number };
 
@@ -28,6 +30,7 @@ export function SettingsPage() {
   const [confirmClear, setConfirmClear] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const showServer = serverFeaturesEnabled();
+  const pro = usePro();
 
   const loadSnapshots = async () => {
     try {
@@ -107,8 +110,11 @@ export function SettingsPage() {
           { to: "/summaries", icon: "📝", label: "まとめノート" },
           { to: "/history", icon: "📈", label: "学習履歴" },
           { to: "/procedures", icon: "📅", label: "手続き・適用基準" },
+          ...(pro.enabled ? [{ to: "/pro", icon: "⭐", label: "プロ版", detail: pro.isPro ? "利用中" : undefined }] : []),
         ]}
       />
+
+      <ProSettings />
 
       {showServer && (
       <section className="card space-y-3">

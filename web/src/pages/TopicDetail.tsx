@@ -8,6 +8,8 @@ import { useAttempts, useCardStates, useTopicProgress } from "../hooks/useData";
 import { useStartSession } from "../hooks/useStartSession";
 import { markNoteRead, updateTopicProgress } from "../lib/repo";
 import { accuracyOf, latestAttemptByQuestion } from "../lib/stats";
+import { isProKind } from "../billing/proFeatures";
+import { ProBadge } from "../components/paywall/ProLock";
 
 type Tab = "note" | "diagrams" | "cards" | "questions" | "memo";
 
@@ -68,6 +70,7 @@ export function TopicDetailPage() {
           正誤・一問一答
         </button>
         <button className="btn-secondary text-xs py-1" onClick={() => quick(["mini", "calc"], 0, "小論述・計算")}>
+          <ProBadge className="mr-1" />
           小論述・計算
         </button>
         <button className="btn-primary text-xs py-1" onClick={() => quick(["card", "tf", "short", "mini", "calc"], 30, "集中30分")}>
@@ -135,7 +138,7 @@ export function TopicDetailPage() {
                   className="btn-secondary text-xs py-1 shrink-0"
                   onClick={() => start({ preset: "single", title: `${topic.title}: ${KIND_LABELS[r.kind]}`, subjects: [topic.subject], topicIds: [topic.id], kinds: [r.kind], maxQuestions: 1, timeLimitMinutes: 0, order: "topic", preferUnseen: false, examMode: false })}
                 >
-                  解く
+                  {isProKind(r.kind) && <ProBadge className="mr-1" />}解く
                 </button>
               </div>
             );

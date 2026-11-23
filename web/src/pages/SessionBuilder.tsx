@@ -5,9 +5,14 @@ import { useAttempts, useCardStates } from "../hooks/useData";
 import { useStartSession } from "../hooks/useStartSession";
 import { examPreset, planSession, PRESETS } from "../lib/sessionPlanner";
 import { buildHistory } from "../lib/stats";
+import { usePaywall, usePro } from "../billing/ProProvider";
+import { isProKind } from "../billing/proFeatures";
+import { ProBadge } from "../components/paywall/ProLock";
 
 export function SessionBuilderPage() {
   const start = useStartSession();
+  const { unlocked } = usePro();
+  const openPaywall = usePaywall();
   const attempts = useAttempts();
   const cards = useCardStates();
   const [subjects, setSubjects] = useState<SubjectId[]>([]);
@@ -45,7 +50,9 @@ export function SessionBuilderPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {PRESETS.map((p) => (
             <button key={p.id} className="card text-left hover:shadow-md" onClick={() => go(p.build(subjects.length ? subjects : undefined))}>
-              <div className="font-semibold text-sm">{p.title}</div>
+              <div className="font-semibold text-sm">
+                {p.title} {p.id === "weak" && <ProBadge />}
+              </div>
               <div className="text-xs text-slate-500 mt-1">{p.description}</div>
             </button>
           ))}
@@ -54,7 +61,9 @@ export function SessionBuilderPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {EXAM_FORMATS.map((f) => (
             <button key={f.subject} className="card text-left hover:shadow-md border-l-4" style={{ borderLeftColor: SUBJECTS.find((s) => s.id === f.subject)!.color }} onClick={() => go(examPreset(f.subject))}>
-              <div className="font-semibold text-sm">{f.label}</div>
+              <div className="font-semibold text-sm">
+                {f.label} <ProBadge />
+              </div>
               <div className="text-xs text-slate-500 mt-1">
                 {f.minutes}分・大問{f.essayCount + f.calcCount}
               </div>
@@ -96,8 +105,8 @@ export function SessionBuilderPage() {
           <label className="label">形式（複数可）</label>
           <div className="flex flex-wrap gap-2">
             {KIND_ORDER.map((k) => (
-              <button key={k} className={`chip py-1.5 px-3 border transition-colors ${kinds.includes(k) ? "bg-brand text-white border-brand" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} onClick={() => setKinds(toggle(kinds, k))}>
-                {KIND_LABELS[k]}
+              <button key={k} className={`chip py-1.5 px-3 border transition-colors ${kinds.includes(k) ? "bg-brand text-white border-brand" : "bg-white/60 border-white/80 text-slate-700 hover:bg-white/90"}`} onClick={() => (!unlocked && isProKind(k) ? openPaywall("essay") : setKinds(toggle(kinds, k)))}>
+                {KIND_LABELS[k]} {isProKind(k) && <ProBadge className="ml-0.5" />}
               </button>
             ))}
           </div>

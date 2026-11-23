@@ -3,6 +3,7 @@ import { EmptyState, formatDate, PageTitle } from "../components/ui";
 import { useSummaries } from "../hooks/useData";
 import { deleteSummary } from "../lib/repo";
 import { SUBJECTS } from "@cpa/shared";
+import { ProBadge } from "../components/paywall/ProLock";
 
 export function SummariesPage() {
   const summaries = useSummaries().sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
@@ -13,7 +14,7 @@ export function SummariesPage() {
         subtitle="試験前の見直し用に、要点・カード・弱点を1枚にまとめる"
         right={
           <Link to="/summaries/new" className="btn-primary">
-            ＋ 作成
+            ＋ 作成 <ProBadge className="ml-1" />
           </Link>
         }
       />

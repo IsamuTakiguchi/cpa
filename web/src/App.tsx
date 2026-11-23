@@ -16,11 +16,14 @@ import { SettingsPage } from "./pages/Settings";
 import { AuthPage } from "./pages/Auth";
 import { ProceduresPage } from "./pages/Procedures";
 import { serverFeaturesEnabled } from "./native/platform";
+import { ProProvider } from "./billing/ProProvider";
+import { ProPage } from "./pages/Pro";
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ProProvider>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<HomePage />} />
@@ -38,9 +41,11 @@ export default function App() {
             <Route path="settings" element={<SettingsPage />} />
             <Route path="auth" element={serverFeaturesEnabled() ? <AuthPage /> : <Navigate to="/settings" replace />} />
             <Route path="procedures" element={<ProceduresPage />} />
+            <Route path="pro" element={<ProPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
+        </ProProvider>
       </BrowserRouter>
     </AuthProvider>
   );

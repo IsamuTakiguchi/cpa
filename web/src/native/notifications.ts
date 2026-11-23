@@ -40,13 +40,14 @@ export async function getReminderPrefs(): Promise<ReminderPrefs> {
   }
 }
 
-async function plugin() {
-  return (await import("@capacitor/local-notifications")).LocalNotifications;
+/** プラグインは Promise の結果として返さない（billing.ts の rc() の注意を参照）ので、モジュールを返す */
+function plugin() {
+  return import("@capacitor/local-notifications");
 }
 
 export async function notificationPermission(): Promise<PermissionState> {
   if (!isNative()) return "unsupported";
-  const p = await (await plugin()).checkPermissions();
+  const p = await (await plugin()).LocalNotifications.checkPermissions();
   return p.display === "granted" ? "granted" : p.display === "denied" ? "denied" : "prompt";
 }
 
@@ -58,7 +59,7 @@ export async function saveReminderPrefs(next: ReminderPrefs): Promise<{ prefs: R
   let prefs = next;
   let denied = false;
   if (isNative() && (next.daily || next.deadlines)) {
-    const ln = await plugin();
+    const { LocalNotifications: ln } = await plugin();
     let state = (await ln.checkPermissions()).display;
     if (state !== "granted" && state !== "denied") state = (await ln.requestPermissions()).display;
     if (state !== "granted") {
@@ -80,7 +81,7 @@ function atTime(day: Date, hhmm: string): Date {
 export async function rescheduleReminders(): Promise<void> {
   if (!isNative()) return;
   try {
-    const ln = await plugin();
+    const { LocalNotifications: ln } = await plugin();
     const prefs = await getReminderPrefs();
 
     // このアプリが予約した分を取り消す
@@ -146,7 +147,7 @@ export async function rescheduleReminders(): Promise<void> {
 /** 通知をタップしたときの遷移先を受け取る */
 export async function onNotificationTap(handler: (route: string) => void): Promise<() => void> {
   if (!isNative()) return () => undefined;
-  const ln = await plugin();
+  const { LocalNotifications: ln } = await plugin();
   const h = await ln.addListener("localNotificationActionPerformed", (a) => {
     const route = (a.notification.extra as { route?: string } | undefined)?.route;
     if (route && route.startsWith("/")) handler(route);

@@ -10,6 +10,9 @@ import { Alert, formatDate, Modal, pct, ProgressBar, SubjectChip } from "../comp
 import { abandonSession } from "../lib/repo";
 import { formatJpDate, pendingChecklist, upcomingEvents } from "../lib/examSchedule";
 import { serverFeaturesEnabled } from "../native/platform";
+import { usePaywall, usePro } from "../billing/ProProvider";
+import { isProKind } from "../billing/proFeatures";
+import { ProBadge } from "../components/paywall/ProLock";
 
 export function HomePage() {
   const settings = useSettings();
@@ -19,6 +22,8 @@ export function HomePage() {
   const sessions = useSessions();
   const { user } = useAuth();
   const start = useStartSession();
+  const { unlocked } = usePro();
+  const openPaywall = usePaywall();
   const [picking, setPicking] = useState<Preset | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -142,9 +147,12 @@ export function HomePage() {
         <h2 className="font-bold mb-2">すぐ始める</h2>
         <div className="grid grid-cols-2 gap-2">
           {PRESETS.map((p) => (
-            <button key={p.id} className="card text-left" onClick={() => setPicking(p)}>
-              <div className="font-semibold">{p.title}</div>
+            <button key={p.id} className="card text-left" onClick={() => (!unlocked && p.id === "weak" ? openPaywall("weak") : setPicking(p))}>
+              <div className="font-semibold">
+                {p.title} {p.id === "weak" && <ProBadge />}
+              </div>
               <div className="text-xs text-slate-500 mt-1 leading-5">{p.description}</div>
+              {!unlocked && p.id !== "weak" && p.build().kinds.some(isProKind) && <div className="text-[11px] text-amber-700 mt-1">※論述・計算はプロ版</div>}
               <div className="text-xs text-brand mt-2">約{p.minutes}分</div>
             </button>
           ))}
@@ -161,7 +169,9 @@ export function HomePage() {
                 if (!id) setError("本試験形式の問題が不足しています。");
               }}
             >
-              <div className="text-xs text-slate-500">本試験形式</div>
+              <div className="text-xs text-slate-500">
+                本試験形式 <ProBadge />
+              </div>
               <div className="font-semibold text-sm">{f.label}</div>
               <div className="text-xs text-slate-500 mt-1">
                 {f.minutes}分・大問{f.essayCount + f.calcCount}

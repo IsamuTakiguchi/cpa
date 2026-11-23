@@ -5,12 +5,25 @@ import { db } from "../db/local";
 import { createSession } from "../lib/repo";
 import { planSession } from "../lib/sessionPlanner";
 import { buildHistory } from "../lib/stats";
+import { usePaywall, usePro } from "../billing/ProProvider";
+import { gateSession } from "../billing/proFeatures";
 
-/** 設定から出題を決めてセッションを作成し、実行画面へ遷移する */
+/**
+ * 設定から出題を決めてセッションを作成し、実行画面へ遷移する。
+ * 戻り値: セッション ID ／ null（条件に合う問題なし）／ "locked"（プロ版が必要 → 課金画面へ遷移済み）
+ */
 export function useStartSession() {
   const navigate = useNavigate();
+  const { unlocked } = usePro();
+  const openPaywall = usePaywall();
   return useCallback(
-    async (config: SessionConfig): Promise<string | null> => {
+    async (requested: SessionConfig): Promise<string | null> => {
+      const gate = gateSession(requested, unlocked);
+      if (gate.kind === "locked") {
+        openPaywall(gate.feature);
+        return "locked";
+      }
+      const config = gate.config;
       const attempts = await db.attempts.filter((a) => !a.deletedAt).toArray();
       const cards = await db.cardStates.filter((c) => !c.deletedAt).toArray();
       const plan = planSession(config, buildHistory(attempts, cards));
@@ -19,6 +32,6 @@ export function useStartSession() {
       navigate(`/session/${s.id}`);
       return s.id;
     },
-    [navigate],
+    [navigate, unlocked, openPaywall],
   );
 }

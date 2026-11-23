@@ -4,6 +4,7 @@ import { KindChip, PageTitle, pct, SubjectChip } from "../components/ui";
 import { useAttempts, useCardStates } from "../hooks/useData";
 import { useStartSession } from "../hooks/useStartSession";
 import { weakItems } from "../lib/stats";
+import { ProBadge } from "../components/paywall/ProLock";
 
 export function ReviewPage() {
   const attempts = useAttempts();
@@ -45,7 +46,7 @@ export function ReviewPage() {
           <h2 className="font-bold">得点の低かった問題（{weak.length}）</h2>
           {weak.length > 0 && (
             <button className="btn-secondary text-xs" onClick={() => start({ preset: "weak", title: "弱点補強", subjects: [], topicIds: [], kinds: [...new Set(weak.map((w) => w.attempt.kind as QuestionKind))], maxQuestions: Math.min(weak.length, 20), timeLimitMinutes: 0, order: "weak", preferUnseen: false, examMode: false })}>
-              まとめて再挑戦
+              まとめて再挑戦 <ProBadge className="ml-1" />
             </button>
           )}
         </div>

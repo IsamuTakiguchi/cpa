@@ -5,8 +5,17 @@ import { Alert, PageTitle } from "../components/ui";
 import { useAttempts, useTopicProgress } from "../hooks/useData";
 import { saveSummary } from "../lib/repo";
 import { buildSummaryMarkdown, DEFAULT_SCOPE, topicsInScope } from "../lib/summaryBuilder";
+import { ProGate } from "../components/paywall/ProLock";
 
 export function SummaryBuilderPage() {
+  return (
+    <ProGate feature="summary" title="まとめノートはプロ版の機能です" description="要点・暗記カード・弱点・自分の答案から、試験前の見直し用ノートを 1 枚にまとめて、印刷・PDF 保存できます。">
+      <SummaryBuilderForm />
+    </ProGate>
+  );
+}
+
+function SummaryBuilderForm() {
   const navigate = useNavigate();
   const attempts = useAttempts();
   const progress = useTopicProgress();
